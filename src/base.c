@@ -136,10 +136,9 @@ void    svc( void ) {
     case SYSNUM_GET_TIME_OF_DAY:
     	// calling the hardware function and return value to time
     	ZCALL(MEM_READ(Z502ClockStatus, &time));
-    	// de reference the ptr and assign the returned time value
+    	// dereference the ptr and assign the returned time value
     	* (INT32 *)Z502_ARG1.PTR =time;
     	break;
-
     case SYSNUM_TERMINATE_PROCESS:
     	Z502_HALT();
     	break;
