@@ -118,6 +118,9 @@ void    svc( void ) {
     INT16               call_type;
     static INT16        do_print = 10;
 
+    // time variable for GET_TIME_OF_DAY call
+    INT32 time;
+
     call_type = (INT16)SYS_CALL_CALL_TYPE;
     if ( do_print > 0 ) {
         printf( "SVC handler: %s %8ld %8ld %8ld %8ld %8ld %8ld\n",
@@ -125,6 +128,26 @@ void    svc( void ) {
                 Z502_ARG3.VAL, Z502_ARG4.VAL, 
                 Z502_ARG5.VAL, Z502_ARG6.VAL );
         do_print--;
+    }
+
+    // 1/12 9:40 PM - Belbesy
+    // Switch on system calls
+    switch(call_type){
+    case SYSNUM_GET_TIME_OF_DAY:
+    	// calling the hardware function and return value to time
+    	ZCALL(MEM_READ(Z502ClockStatus, &time));
+    	// de reference the ptr and assign the returned time value
+    	* (INT32 *)Z502_ARG1.PTR =time;
+    	break;
+
+    case SYSNUM_TERMINATE_PROCESS:
+    	Z502_HALT();
+    	break;
+    default:
+    	// if bogus call, report error
+    	printf("** ERROR! call_type in svc is undefined call_type = %d\n", call_type);
+    	break;
+
     }
 }                                               // End of svc 
 
