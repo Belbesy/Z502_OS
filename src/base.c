@@ -21,34 +21,12 @@
         3.11 August  2004: Support for OS level locking
 ************************************************************************/
 
-#include             "global.h"
-#include             "syscalls.h"
-#include             "protos.h"
-#include             "string.h"
-
-extern char          MEMORY[];  
-//extern BOOL          POP_THE_STACK;
-extern UINT16        *Z502_PAGE_TBL_ADDR;
-extern INT16         Z502_PAGE_TBL_LENGTH;
-extern INT16         Z502_PROGRAM_COUNTER;
-extern INT16         Z502_INTERRUPT_MASK;
-extern INT32         SYS_CALL_CALL_TYPE;
-extern INT16         Z502_MODE;
-extern Z502_ARG      Z502_ARG1;
-extern Z502_ARG      Z502_ARG2;
-extern Z502_ARG      Z502_ARG3;
-extern Z502_ARG      Z502_ARG4;
-extern Z502_ARG      Z502_ARG5;
-extern Z502_ARG      Z502_ARG6;
-
-extern void          *TO_VECTOR [];
-extern INT32         CALLING_ARGC;
-extern char          **CALLING_ARGV;
+#include 			"base.h"
 
 char                 *call_names[] = { "mem_read ", "mem_write",
-                            "read_mod ", "get_time ", "sleep    ", 
-                            "get_pid  ", "create   ", "term_proc", 
-                            "suspend  ", "resume   ", "ch_prior ", 
+                            "read_mod ", "get_time ", "sleep    ",
+                            "get_pid  ", "create   ", "term_proc",
+                            "suspend  ", "resume   ", "ch_prior ",
                             "send     ", "receive  ", "disk_read",
                             "disk_wrt ", "def_sh_ar" };
 
@@ -107,6 +85,35 @@ void    fault_handler( void )
     MEM_WRITE(Z502InterruptClear, &Index );
 }                                       /* End of fault_handler */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /************************************************************************
     SVC
         The beginning of the OS502.  Used to receive software interrupts.
@@ -114,41 +121,58 @@ void    fault_handler( void )
         handled by the student written code here.
 ************************************************************************/
 
-void    svc( void ) {
-    INT16               call_type;
-    static INT16        do_print = 10;
 
-    // time variable for GET_TIME_OF_DAY call
-    INT32 time;
 
+
+
+void    svc( void )
+{
+
+	INT16    call_type; 	// The Type of the System Call
     call_type = (INT16)SYS_CALL_CALL_TYPE;
-    if ( do_print > 0 ) {
-        printf( "SVC handler: %s %8ld %8ld %8ld %8ld %8ld %8ld\n",
-                call_names[call_type], Z502_ARG1.VAL, Z502_ARG2.VAL, 
-                Z502_ARG3.VAL, Z502_ARG4.VAL, 
-                Z502_ARG5.VAL, Z502_ARG6.VAL );
-        do_print--;
-    }
 
-    // 1/12 9:40 PM - Belbesy
-    // Switch on system calls
-    switch(call_type){
-    case SYSNUM_GET_TIME_OF_DAY:
-    	// calling the hardware function and return value to time
-    	ZCALL(MEM_READ(Z502ClockStatus, &time));
-    	// dereference the ptr and assign the returned time value
-    	* (INT32 *)Z502_ARG1.PTR =time;
-    	break;
-    case SYSNUM_TERMINATE_PROCESS:
-    	Z502_HALT();
-    	break;
-    default:
-    	// if bogus call, report error
-    	printf("** ERROR! call_type in svc is undefined call_type = %d\n", call_type);
-    	break;
 
-    }
-}                                               // End of svc 
+    // Create a new instance of the system_calls class
+    system_calls* myInstance = system_calls_new();
+
+    // Call the execute _system_call method
+	CALL(execute_system_call(myInstance, call_type));
+
+	// Delete the system_calls class instance
+	system_calls_delete(myInstance);
+
+}
+// End of svc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /************************************************************************
     OS_SWITCH_CONTEXT_COMPLETE

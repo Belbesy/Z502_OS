@@ -7,14 +7,14 @@
 
         Revision History:
         1.0 August 1990:        Initial release
-        1.1 Jan 1991:           Make system calls portable 
-                                by using union of pointer 
-                                and long.  Add incls for 
+        1.1 Jan 1991:           Make system calls portable
+                                by using union of pointer
+                                and long.  Add incls for
                                 scheduler_printer.
-        1.2 Dec 1991;           Allow interrupts to occur 
-                                in user code and in CALL 
+        1.2 Dec 1991;           Allow interrupts to occur
+                                in user code and in CALL
                                 statements.
-        1.5 Aug 1993;           Add READ_MODIFY & 
+        1.5 Aug 1993;           Add READ_MODIFY &
                                 DEFINE_SHARED_AREA support.
         2.0 Jan 2000;           Small changes
         2.1 May 2001;           Fix STEP macro.  DISK macros.
@@ -113,7 +113,7 @@ extern int      BaseThread();
 #define         MEM_READ( arg1, arg2 )   Z502_MEM_READ( arg1, arg2 )
 #endif 
 
-                                             
+
 #ifdef  USER
 #define         MEM_WRITE( arg1, arg2 )                         \
                 {                                               \
