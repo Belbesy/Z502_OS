@@ -75,7 +75,7 @@ void alarm_ih(int device_id, int status) {
 
  ************************************************************************/
 void z502_timer_set() {
-	int get_status;
+	int get_status, ss;
 	MEM_READ(Z502TimerStatus, &get_status);
 
 	switch (get_status) {
@@ -88,9 +88,12 @@ void z502_timer_set() {
 		// device is free, this should be the case always
 		// as this method is the only user for the timer.
 		// reset the timer.
-		MEM_WRITE(Z502TimerStatus, TIMER_INTERVAL);
+		// TODO : fix
+
+		ss = TIMER_INTERVAL;
+		MEM_WRITE(Z502TimerStatus, &ss);
 		break;
-	default:
+	default :
 		// bogus status recieved
 		printf(
 				"SYSTEM INTERNAL ERROR (alarm.c) : bogus timer status recieved!\n");

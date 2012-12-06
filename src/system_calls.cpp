@@ -4,11 +4,16 @@
  *  Created on: Dec 6, 2012
  *      Author: mahmoudel-maghraby
  */
+#include 			 "system_calls.h"
 
-#include 			 "base.h"
+#include             "global.h"
+#include             "z502.h"
+#include             "syscalls.h"
+#include             "protos.h"
+#include             "string.h"
 
 
-void system_calls::execute_system_call(INT16 call_type)
+void execute_system_call(int call_type)
 {
 
 
@@ -23,7 +28,7 @@ void system_calls::execute_system_call(INT16 call_type)
 		// calling the hardware function and return value to time
 		ZCALL(MEM_READ(Z502ClockStatus, &time));
 		// dereference the ptr and assign the returned time value
-		*(INT32 *)Z502_ARG1.PTR =time;
+		//*(INT32 *)Z502_ARG1.PTR =time;
 		break;
 
 
@@ -38,19 +43,4 @@ void system_calls::execute_system_call(INT16 call_type)
 
 }
 
-// access functions
-EXPORT_C system_calls* system_calls_new(void)
-{
-    return new system_calls();
-}
-
-EXPORT_C void system_calls_delete(system_calls* system_calls_class)
-{
-    delete system_calls_class;
-}
-
-EXPORT_C void execute_system_call(system_calls* system_calls_class, INT16 call_type)
-{
-    system_calls_class->execute_system_call(call_type);
-}
 

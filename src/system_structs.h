@@ -5,8 +5,9 @@
  *      Author: mahmoudel-maghraby
  */
 
-#ifndef SYSTEM_STRUCTS_H_
-#define SYSTEM_STRUCTS_H_
+#include             "global.h"
+
+
 #define MAX_LENGTH 50
 
 typedef struct
@@ -25,5 +26,3 @@ typedef struct
 
 }PROCESS;
 
-
-#endif /* SYSTEM_STRUCTS_H_ */

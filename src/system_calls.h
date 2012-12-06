@@ -6,10 +6,14 @@
  */
 
 
-typedef         short                           INT16;
 
 
 
+void execute_system_call(int call_type);
+
+
+/*
+	unneeded call code, we are using a c++ compiler anyway
 #ifdef __cplusplus // only actually define the class if this is C++
 
 class system_calls {
@@ -34,3 +38,5 @@ typedef struct system_calls system_calls;
 EXPORT_C system_calls* system_calls_new(void);
 EXPORT_C void system_calls_delete(system_calls*);
 EXPORT_C void execute_system_call(system_calls*, INT16);
+
+*/

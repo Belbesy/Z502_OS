@@ -21,7 +21,65 @@
         3.11 August  2004: Support for OS level locking
 ************************************************************************/
 
-#include 			"base.h"
+
+
+
+
+
+
+
+
+/************************************************************************
+
+        This code forms the base of the operating system you will
+        build.  It has only the barest rudiments of what you will
+        eventually construct; yet it contains the interfaces that
+        allow test.c and z502.c to be successfully built together.
+
+        Revision History:
+        1.0 August 1990
+        1.1 December 1990: Portability attempted.
+        1.3 July     1992: More Portability enhancements.
+                           Add call to sample_code.
+        1.4 December 1992: Limit (temporarily) printout in
+                           interrupt handler.  More portability.
+        2.0 January  2000: A number of small changes.
+        2.1 May      2001: Bug fixes and clear STAT_VECTOR
+        2.2 July     2002: Make code appropriate for undergrads.
+                           Default program start is in test0.
+        3.0 August   2004: Modified to support memory mapped IO
+        3.1 August   2004: hardware interrupt runs on separate thread
+        3.11 August  2004: Support for OS level locking
+************************************************************************/
+
+
+#include             "os/intman.h"
+#include             "os/faultman.h"
+
+#include             "system_calls.h"
+#include             "global.h"
+#include             "syscalls.h"
+#include             "protos.h"
+#include             "string.h"
+
+extern char          MEMORY[];
+//extern BOOL          POP_THE_STACK;
+extern UINT16        *Z502_PAGE_TBL_ADDR;
+extern INT16         Z502_PAGE_TBL_LENGTH;
+extern INT16         Z502_PROGRAM_COUNTER;
+extern INT16         Z502_INTERRUPT_MASK;
+extern INT32         SYS_CALL_CALL_TYPE;
+extern INT16         Z502_MODE;
+extern Z502_ARG      Z502_ARG1;
+extern Z502_ARG      Z502_ARG2;
+extern Z502_ARG      Z502_ARG3;
+extern Z502_ARG      Z502_ARG4;
+extern Z502_ARG      Z502_ARG5;
+extern Z502_ARG      Z502_ARG6;
+
+extern void          *TO_VECTOR [];
+extern INT32         CALLING_ARGC;
+extern char          **CALLING_ARGV;
 
 char                 *call_names[] = { "mem_read ", "mem_write",
                             "read_mod ", "get_time ", "sleep    ",
@@ -32,125 +90,37 @@ char                 *call_names[] = { "mem_read ", "mem_write",
 
 
 /************************************************************************
-    INTERRUPT_HANDLER
-	call interrupt handler in os/intman
-************************************************************************/
-void    interrupt_handler( void ) {
+ 	 INTERRUPT_HANDLER
+ 	 	 call interrupt handler in os/intman
+ ************************************************************************/
+
+void interrupt_handler(void) {
 	os_interrupt_handler();
-}                                       /* End of interrupt_handler */
-/************************************************************************
-    FAULT_HANDLER
-        The beginning of the OS502.  Used to receive hardware faults.
-************************************************************************/
-
-void    fault_handler( void )
-    {
-    INT32       device_id;
-    INT32       status;
-    INT32       Index = 0;
-
-    // Get cause of interrupt
-    MEM_READ(Z502InterruptDevice, &device_id ); 
-    // Set this device as target of our query
-    MEM_WRITE(Z502InterruptDevice, &device_id );
-    // Now read the status of this device
-    MEM_READ(Z502InterruptStatus, &status );
-
-    printf( "Fault_handler: Found vector type %d with value %d\n", 
-                        device_id, status );
-
-    // Clear out this device - we're done with it
-    MEM_WRITE(Z502InterruptClear, &Index );
-}                                       /* End of fault_handler */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
+/* End of interrupt_handler */
 
 
 /************************************************************************
-    SVC
-        The beginning of the OS502.  Used to receive software interrupts.
-        All system calls come to this point in the code and are to be
-        handled by the student written code here.
-************************************************************************/
+ 	 FAULT_HANDLER
+ 	 	 The beginning of the OS502.  Used to receive hardware faults.
+ ************************************************************************/
 
+void fault_handler(void) {
+	os_fault_handler();
+}
+/* End of fault_handler */
 
+/************************************************************************
+ 	 SVC
+ 	 	 executes system calls
+ ************************************************************************/
 
-
-
-void    svc( void )
-{
-
-	INT16    call_type; 	// The Type of the System Call
-    call_type = (INT16)SYS_CALL_CALL_TYPE;
-
-
-    // Create a new instance of the system_calls class
-    system_calls* myInstance = system_calls_new();
-
-    // Call the execute _system_call method
-	CALL(execute_system_call(myInstance, call_type));
-
-	// Delete the system_calls class instance
-	system_calls_delete(myInstance);
-
+void svc(void) {
+	int call_type = SYS_CALL_CALL_TYPE;
+	// Call the execute _system_call method
+	execute_system_call(call_type);
 }
 // End of svc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /************************************************************************
     OS_SWITCH_CONTEXT_COMPLETE
