@@ -1,9 +1,9 @@
 #include "alarm.h"
 
-#include "../global.h"
-#include "../z502.h"
-#include "../syscalls.h"
-#include "../protos.h"
+#include "../../global.h"
+#include "../../z502.h"
+#include "../../syscalls.h"
+#include "../../protos.h"
 
 #include <stdlib.h>
 
@@ -24,7 +24,6 @@ void init_alarm(void) {
 }
 
 void alarm_ih(int device_id, int status) {
-	//TODO check for error
 	alarmable* cur, *temp, *prev;
 	switch (status) {
 	case ERR_SUCCESS:
@@ -39,15 +38,12 @@ void alarm_ih(int device_id, int status) {
 				cur = cur->next;
 			} else {
 				// delete from list and call
-
 				temp = cur, prev = cur->prev;
 				cur = cur->next;
 				prev->next = cur, cur->prev = cur;
 				alarm_handler call_back = temp->alarm_h;
-
 				// free
 				free(temp);
-
 				// call handler
 				call_back();
 			}

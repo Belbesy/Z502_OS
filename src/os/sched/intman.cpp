@@ -7,10 +7,10 @@
 #include                 "intman.h"
 #include                 "alarm.h"
 
-#include                 "../global.h"
-#include                 "../syscalls.h"
-#include                 "../z502.h"
-#include                 "../protos.h"
+#include                 "../../global.h"
+#include                 "../../syscalls.h"
+#include                 "../../z502.h"
+#include                 "../../protos.h"
 #include                 <stdio.h>
 #include                 <stdlib.h>
 #include                 <string.h>

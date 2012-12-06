@@ -53,10 +53,8 @@
 ************************************************************************/
 
 
-#include             "os/intman.h"
-#include             "os/faultman.h"
+#include             "os/os.h"
 
-#include             "system_calls.h"
 #include             "global.h"
 #include             "syscalls.h"
 #include             "protos.h"

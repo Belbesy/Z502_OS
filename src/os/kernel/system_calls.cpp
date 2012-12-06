@@ -6,11 +6,12 @@
  */
 #include 			 "system_calls.h"
 
-#include             "global.h"
-#include             "z502.h"
-#include             "syscalls.h"
-#include             "protos.h"
-#include             "string.h"
+
+#include             "../../global.h"
+#include             "../../z502.h"
+#include             "../../syscalls.h"
+#include             "../../protos.h"
+#include             "../../string.h"
 
 
 void execute_system_call(int call_type)
