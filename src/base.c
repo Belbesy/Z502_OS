@@ -33,32 +33,10 @@ char                 *call_names[] = { "mem_read ", "mem_write",
 
 /************************************************************************
     INTERRUPT_HANDLER
-        When the Z502 gets a hardware interrupt, it transfers control to
-        this routine in the OS. 
+	call interrupt handler in os/intman
 ************************************************************************/
 void    interrupt_handler( void ) {
-    INT32              device_id;
-    INT32              status;
-    INT32              Index = 0;
-    static BOOL        remove_this_in_your_code = TRUE;   /** TEMP **/
-    static INT32       how_many_interrupt_entries = 0;    /** TEMP **/
-
-    // Get cause of interrupt
-    MEM_READ(Z502InterruptDevice, &device_id ); 
-    // Set this device as target of our query
-    MEM_WRITE(Z502InterruptDevice, &device_id );
-    // Now read the status of this device
-    MEM_READ(Z502InterruptStatus, &status );
-
-    /** REMOVE THE NEXT SIX LINES **/
-    how_many_interrupt_entries++;                         /** TEMP **/
-    if ( remove_this_in_your_code && ( how_many_interrupt_entries < 20 ) )
-        {
-        printf( "Interrupt_handler: Found device ID %d with status %d\n", 
-                        device_id, status );
-    }
-    // Clear out this device - we're done with it
-    MEM_WRITE(Z502InterruptClear, &Index );
+	os_interrupt_handler();
 }                                       /* End of interrupt_handler */
 /************************************************************************
     FAULT_HANDLER

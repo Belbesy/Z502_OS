@@ -5,7 +5,7 @@
  *      Author: mahmoudel-maghraby
  */
 
-
+#include             "os/intman.h"
 #include             "global.h"
 #include             "syscalls.h"
 #include             "protos.h"
