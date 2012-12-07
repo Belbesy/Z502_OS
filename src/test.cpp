@@ -188,7 +188,7 @@ void    test1b( void) {
            STEP( 4 )
                 success_expected( Z502_REG_9, "TERMINATE_PROCESS" );
                 break;
-        /*      Loop until an error is found on the create_process.  
+        /*      Loop until an error is found on the create_process.
                 Since the call itself is legal, we must get an error 
                 because we exceed some limit.                           */
 

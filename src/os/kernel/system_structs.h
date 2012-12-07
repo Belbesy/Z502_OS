@@ -4,25 +4,38 @@
  *  Created on: Dec 6, 2012
  *      Author: mahmoudel-maghraby
  */
+typedef         int                             INT32;
+typedef         unsigned int                   UINT32;
+typedef         short int                        INT16;
+typedef         unsigned short                  UINT16;
+typedef         int                             BOOL;
 
-#include             "global.h"
+#include 			 <map>
+#include 			 <string>
+#include			 <list>
+using namespace std;
 
 
-#define MAX_LENGTH 50
 
-typedef struct
-{
-	char PROCESS_NAME[MAX_LENGTH];
-	INT32 PRIORITY;
-	INT32 ID;
-	INT32 PARENT_ID;
-}PROCESS_PCB;
+
 
 typedef struct
 {
 	void *CONTEXT;
 	void *STARTING_ADDRESS;
-	PROCESS_PCB PCB;
+	char* PROCESS_NAME;
+	INT32 PRIORITY;
+	INT32 ID;
+	INT32 PARENT_ID;
+	list<INT32> children;
+}PCB;
 
-}PROCESS;
+
+map <string, PCB*> P_TABLE_BY_NAME;
+map <INT32, PCB*> P_TABLE_BY_ID;
+
+map<string,PCB*>::iterator NAME_TABLE_IT ;
+map<INT32,PCB*>::iterator ID_TABLE_IT ;
+
+PCB* current_process = NULL ;
 

@@ -156,6 +156,9 @@ typedef         int                             BOOL;
 #define         DEVICE_FREE                             7L
 #define         ERR_Z502_INTERNAL_BUG                   20L
 #define         ERR_OS502_GENERATED_BUG                 21L
+#define			ERR_INVALID_PROCESS_NAME				22L
+#define			ERR_INVALID_PROCESS_PRIORITY			23L
+#define			ERR_DUPLICATE_PROCESS_NAME				24L
 
         /* Miscellaneous                                        */
 

@@ -3,9 +3,9 @@
         This code forms the base of the operating system you will
         build.  It has only the barest rudiments of what you will
         eventually construct; yet it contains the interfaces that
-        allow test.c and z502.c to be successfully built together.      
+        allow test.c and z502.c to be successfully built together.
 
-        Revision History:       
+        Revision History:
         1.0 August 1990
         1.1 December 1990: Portability attempted.
         1.3 July     1992: More Portability enhancements.
@@ -87,6 +87,8 @@ char                 *call_names[] = { "mem_read ", "mem_write",
                             "disk_wrt ", "def_sh_ar" };
 
 
+
+
 /************************************************************************
  	 INTERRUPT_HANDLER
  	 	 call interrupt handler in os/intman
@@ -116,14 +118,14 @@ void fault_handler(void) {
 void svc(void) {
 	int call_type = SYS_CALL_CALL_TYPE;
 	// Call the execute _system_call method
-	execute_system_call(call_type);
+	CALL(execute_system_call(call_type));
 }
 // End of svc
 
 /************************************************************************
     OS_SWITCH_CONTEXT_COMPLETE
         The hardware, after completing a process switch, calls this routine
-        to see if the OS wants to do anything before starting the user 
+        to see if the OS wants to do anything before starting the user
         process.
 ************************************************************************/
 
@@ -140,7 +142,7 @@ void    os_switch_context_complete( void )
 
 /************************************************************************
     OS_INIT
-        This is the first routine called after the simulation begins.  This 
+        This is the first routine called after the simulation begins.  This
         is equivalent to boot code.  All the initial OS components can be
         defined and initialized here.
 ************************************************************************/
@@ -168,7 +170,7 @@ void    os_init( void )
 
     if (( CALLING_ARGC > 1 ) && ( strcmp( CALLING_ARGV[1], "sample" ) == 0 ) )
         {
-        ZCALL( Z502_MAKE_CONTEXT( &next_context, 
+        ZCALL( Z502_MAKE_CONTEXT( &next_context,
                                         (void *)sample_code, KERNEL_MODE ));
         ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
     }                   /* This routine should never return!!           */
@@ -176,7 +178,7 @@ void    os_init( void )
     /*  This should be done by a "os_make_process" routine, so that
         test0 runs on a process recognized by the operating system.    */
 
-    ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test0, USER_MODE ));
+    ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1b, USER_MODE ));
     ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
 
 }                                               /* End of os_init       */
