@@ -55,9 +55,8 @@ void execute_system_call(int call_type)
 
 	case SYSNUM_CREATE_PROCESS:
 
-		printf("ana hna ya 7ywan");
-		/*
-		 STEP(1): Test for name validity
+
+		 //STEP(1): Test for name validity
 
 		if(strcpy((char*) Z502_ARG1.PTR,"")==0)
 		{
@@ -73,7 +72,7 @@ void execute_system_call(int call_type)
 		}
 
 
-		 STEP(2): Test for priority validity
+		 // Test for priority validity
 
 		if(Z502_ARG3.VAL <= 0)
 		{
@@ -82,7 +81,7 @@ void execute_system_call(int call_type)
 		}
 
 
-		 STEP(3): Prepare a new Process Control Block
+		 // Prepare a new Process Control Block
 
 		PCB* new_pcb ; 									// create new Process Control Bloc
 		new_pcb->PROCESS_NAME = (char*) Z502_ARG1.PTR ; // set process name
@@ -110,14 +109,13 @@ void execute_system_call(int call_type)
 														// current process
 
 
-		 STEP(4): Insert PCB into Processes Tables
+		 // Insert PCB into Processes Tables
 
 		P_TABLE_BY_NAME[new_pcb->PROCESS_NAME] = new_pcb;
 		P_TABLE_BY_ID[new_pcb->ID]= new_pcb;
 
-		break;
-*/
 
+		break;
 	case SYSNUM_TERMINATE_PROCESS:
 		Z502_HALT();
 		break;
