@@ -4,6 +4,7 @@
 
 // Interrupt handlers
 void init_alarm(void);
+void add_alarm(alarmable_t*);
 void alarm_ih(int a, int b);
 void z502_timer_set(void);
 
@@ -21,3 +22,4 @@ struct alarmable_t{
 };
 
 typedef struct alarmable_t alarmable;
+

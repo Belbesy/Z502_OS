@@ -1,3 +1,7 @@
-void os_fault_handler(){
+
+
+#include  "faultman.h"
+
+void os_fault_handler() {
 
 }

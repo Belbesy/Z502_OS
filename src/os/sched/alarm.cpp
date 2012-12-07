@@ -23,6 +23,12 @@ void init_alarm(void) {
 	z502_timer_set();
 }
 
+void add_alarm(alarmable* alarm) {
+	alarmable* next = head->next;
+	next->prev = alarm, head->next = alarm;
+	alarm->prev = head, alarm->next = next;
+}
+
 void alarm_ih(int device_id, int status) {
 	alarmable* cur, *temp, *prev;
 	switch (status) {
@@ -89,7 +95,7 @@ void z502_timer_set() {
 		ss = TIMER_INTERVAL;
 		MEM_WRITE(Z502TimerStatus, &ss);
 		break;
-	default :
+	default:
 		// bogus status recieved
 		printf(
 				"SYSTEM INTERNAL ERROR (alarm.c) : bogus timer status recieved!\n");
