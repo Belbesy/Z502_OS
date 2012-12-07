@@ -472,18 +472,33 @@ void    do_memory_debug( INT16 invalidity, INT16 vpn )
 
                 Set a flag and call common code
 
+
     *****************************************************************/
 
-void    Z502_MEM_READ( INT32 virtual_address, INT32 *data_ptr )
+void    Z502_MEM_READ( long virtual_address, long *data_ptr )
     {
     ZCALL( mem_common( virtual_address, (char *)data_ptr, 
                        (BOOL)SYSNUM_MEM_READ ) ); 
 }                                       /* End  Z502_MEM_READ  */
 
 
-void    Z502_MEM_WRITE( INT32 virtual_address, INT32 *data_ptr )
+void    Z502_MEM_WRITE( long virtual_address, long *data_ptr )
     {
     ZCALL( mem_common( virtual_address, (char *)data_ptr, 
+                       (BOOL)SYSNUM_MEM_WRITE ) );
+}                                       /* End  Z502_MEM_WRITE  */
+
+
+void    Z502_MEM_READ( INT32 virtual_address, INT32 *data_ptr )
+    {
+    ZCALL( mem_common( virtual_address, (char *)data_ptr,
+                       (BOOL)SYSNUM_MEM_READ ) );
+}                                       /* End  Z502_MEM_READ  */
+
+
+void    Z502_MEM_WRITE( INT32 virtual_address, INT32 *data_ptr )
+    {
+    ZCALL( mem_common( virtual_address, (char *)data_ptr,
                        (BOOL)SYSNUM_MEM_WRITE ) );
 }                                       /* End  Z502_MEM_WRITE  */
 
