@@ -4,7 +4,7 @@
 
  struct q_item_t {
 	PCB * proc;
-	q_item_t* prev, next;
+	q_item_t* prev,* next;
 };
 
  typedef q_item_t q_item;

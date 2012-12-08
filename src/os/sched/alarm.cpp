@@ -69,6 +69,7 @@ void alarm_ih(int device_id, int status) {
 		break;
 	}
 }
+
 /* End of os_interrupt_handler */
 
 /************************************************************************
