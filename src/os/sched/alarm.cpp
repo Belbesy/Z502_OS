@@ -65,7 +65,7 @@ void alarm_ih(int device_id, int status) {
 	default:
 		// bogus status received
 		printf(
-				"SYSTEM INTERNAL ERROR (alarm.c) :  bogus timer status recieved, terminating..\n");
+				"SYSTEM INTERNPARENTAL ERROR (alarm.c) :  bogus timer status recieved, terminating..\n");
 		break;
 	}
 }

@@ -173,6 +173,8 @@ typedef         int                             BOOL;
 #define         USER_MODE                               (short)0
 #define         KERNEL_MODE                             (short)1
 
+
+#define        NEW(x)                                   ((x *) malloc(sizeof(x)));
 /*  This structure is used so that the hardware registers can be
     referenced both as pointers and as values.  Different system
     calls will use them in different ways.    See Appendix B, 3.1

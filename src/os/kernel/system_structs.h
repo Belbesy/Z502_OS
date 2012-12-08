@@ -15,6 +15,16 @@ typedef         int                             BOOL;
 #include			 <list>
 
 #define MAX_NUM_OF_PROCESSES 100
+
+
+#define PROCESS_STATE_READY 		1
+#define PROCESS_STATE_SLEEPING 		2
+
+#define PROCESS_STATE_BLOCKED 		3 	// blocked by other process
+#define PROCESS_STATE_SUSPENDED 	4   // suspended by user
+
+
+
 using namespace std;
 
 
@@ -30,6 +40,8 @@ struct PCB
 	INT32 ID;
 	INT32 PARENT_ID;
 	list<INT32>* children;
+
+	INT32 STATE;
 };
 
 

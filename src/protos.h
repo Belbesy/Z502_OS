@@ -12,7 +12,7 @@
         2.1    May    2001     Add memory_printer.
         2.2    July   2002     Make code appropriate for undergrads.
         3.1 August   2004: hardware interrupt runs on separate thread
-        3.11 August  2004: Support for OS level locking
+        3.11 AugusTERMINATE_PROCESSt  2004: Support for OS level locking
 
 *********************************************************************/
 

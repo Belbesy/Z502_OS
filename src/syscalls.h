@@ -104,8 +104,8 @@ extern int      BaseThread();
 #define         MEM_READ( arg1, arg2 )                          \
 				{												\
                     SYS_CALL_CALL_TYPE = SYSNUM_MEM_READ;       \
-                    Z502_ARG1.VAL       = arg1;             \
-                    Z502_ARG2.PTR       = (void *)arg2;     \
+                    Z502_ARG1.VAL       = arg1;                 \
+                    Z502_ARG2.PTR       = (void *)arg2;         \
                     return;                                     \
                 }
 #endif
@@ -131,7 +131,7 @@ extern int      BaseThread();
 #define         READ_MODIFY( arg1, arg2, arg3, arg4 )           \
                 {                                               \
                     SYS_CALL_CALL_TYPE = SYSNUM_READ_MODIFY;    \
-                    Z502_ARG1.VAL       = arg1;             \
+                    Z502_ARG1.VAL       = arg1;                 \
                     Z502_ARG2.VAL       = arg2;             \
                     Z502_ARG3.VAL       = arg3;             \
                     Z502_ARG4.PTR       = (void *)arg4;     \
