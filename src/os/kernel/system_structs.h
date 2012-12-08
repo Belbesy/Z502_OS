@@ -13,13 +13,15 @@ typedef         int                             BOOL;
 #include 			 <map>
 #include 			 <string>
 #include			 <list>
+
+#define MAX_NUM_OF_PROCESSES 100
 using namespace std;
 
 
 
 
 
-typedef struct
+struct PCB
 {
 	void *CONTEXT;
 	void *STARTING_ADDRESS;
@@ -27,8 +29,10 @@ typedef struct
 	INT32 PRIORITY;
 	INT32 ID;
 	INT32 PARENT_ID;
-	list<INT32> children;
-}PCB;
+	list<INT32>* children;
+};
+
+
 
 
 map <string, PCB*> P_TABLE_BY_NAME;

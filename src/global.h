@@ -159,6 +159,9 @@ typedef         int                             BOOL;
 #define			ERR_INVALID_PROCESS_NAME				22L
 #define			ERR_INVALID_PROCESS_PRIORITY			23L
 #define			ERR_DUPLICATE_PROCESS_NAME				24L
+#define			ERR_INVALID_PROCESS_ID					25L
+#define			ERR_MAX_NUM_EXCEEDED					26L
+#define			ERR_UNAUTHORIZED_TERMINATION			27L
 
         /* Miscellaneous                                        */
 
