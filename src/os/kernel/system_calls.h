@@ -4,6 +4,8 @@
  *  Created on: Dec 6, 2012
  *      Author: mahmoudel-maghraby
  */
+#ifndef SYSTEM_CALLS_H
+#define SYSTEM_CALLS_H
 
 typedef         int                             INT32;
 
@@ -11,3 +13,4 @@ void execute_system_call(int call_type);
 void terminate_process(INT32 ID);
 
 
+#endif

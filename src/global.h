@@ -24,6 +24,8 @@
         3.60 August 2012        Updates with student generated code to
                                 support MACs
 ****************************************************************************/
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 #define         CURRENT_REL                     "3.60"
 // #define         NT
@@ -185,3 +187,5 @@ typedef         union
     void        *PTR;
     long        VAL;
 } Z502_ARG;
+
+#endif

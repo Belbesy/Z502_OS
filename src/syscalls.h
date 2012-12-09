@@ -24,6 +24,8 @@
         3.11 Aug 2004:          Support for OS level locking
 	3.30 July 2006:         Modify POP_THE_STACK to apply to base only
 *********************************************************************/
+#ifndef SYSCALLS_H
+#define SYSCALLS_H
 
 #include        "stdio.h"
 
@@ -289,3 +291,5 @@ extern int      BaseThread();
 
 #define         SP_HEADER_STRING        \
 " Time Target Action  Run New Done       State Populations \n"
+
+#endif

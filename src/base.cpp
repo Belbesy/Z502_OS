@@ -166,6 +166,9 @@ void    os_init( void )
     TO_VECTOR[TO_VECTOR_FAULT_HANDLER_ADDR] = (void *)fault_handler;
     TO_VECTOR[TO_VECTOR_TRAP_HANDLER_ADDR]  = (void *)svc;
 
+    scheduler.init();
+    alarm_manager.init();
+
     /*  Determine if the switch was set, and if so go to demo routine.  */
 
     if (( CALLING_ARGC > 1 ) && ( strcmp( CALLING_ARGV[1], "sample" ) == 0 ) )

@@ -2,27 +2,35 @@
 
 #include "../../global.h"
 #include "../../syscalls.h"
-#include "../../z502.h"
 #include "../../protos.h"
 
 #include "../kernel/system_structs.h"
 
 #include "alarm.h"
+#include "process_queue.h"
 
 #include <cstdio>
 #include <list>
 #include <queue>
 #include <map>
 
-scheduler_t scheduler;
+extern alarm_manager_t alarm_manager;
+extern scheduler_t scheduler;
 
-void _wakeup(void ref) {
+void _wakeup(void* ref) {
 	scheduler.wakeup((PCB *) ref);
 }
 void _feed(void * ref) {
 	scheduler.feed((PCB*) ref);
 }
 
+ scheduler_t::scheduler_t(){
+
+}
+
+void scheduler_t::init(){
+
+ }
 void scheduler_t::wakeup(PCB* p) {
 
 	if (p->STATE != PROCESS_STATE_SLEEPING) {
@@ -47,7 +55,7 @@ void scheduler_t::feed(PCB* p) {
 				"INTERNAL ERROR (scheduler->feed): process wasn't ready when set ana alarm!\n");
 		return;
 	}
-	this->starving.queue(p);
+	this->starving.enqueue(p);
 }
 
 void scheduler_t::schedule() {
@@ -56,9 +64,9 @@ void scheduler_t::schedule() {
 
 	if (starving.size()) {
 		p = starving.dequeue();
-	}else {
-		for(int i=0; i<MAX_PRIORITY; i++){
-			if(this->ready[i].size()){
+	} else {
+		for (int i = 0; i < MAX_PRIORITY; i++) {
+			if (this->ready[i].size()) {
 				p = this->ready[i].dequeue();
 				break;
 			}
@@ -231,7 +239,7 @@ bool scheduler_t::suspend(PCB* p, int* err) {
 	// change process state to suspended
 	p->STATE = PROCESS_STATE_SUSPENDED;
 	// put in queue
-	this->suspended.queue(p);
+	this->suspended.enqueue(p);
 	// success
 	return true;
 }
@@ -257,8 +265,8 @@ bool scheduler_t::terminate(PCB* p, int* err) {
 	case PROCESS_STATE_BLOCKED:
 		if (!this->blocked.remove(p)) {
 			printf(
-					"USER_ERROR (scheduler->terminate): process wasn't found in blocked queue")
-					* err = USER_ERROR_CORRUPTED_PROCESS;
+					"USER_ERROR (scheduler->terminate): process wasn't found in blocked queue");
+			*err = USER_ERROR_CORRUPTED_PROCESS;
 			return false;
 		}
 		break;
@@ -293,7 +301,7 @@ bool scheduler_t::terminate(PCB* p, int* err) {
 
 bool scheduler_t::add_to_ready(PCB * p) {
 	alarm_manager.add_alarm(alarmable(STARVING_INTERVAL, _feed, p));
-	this->ready[p->PRIORITY].queue(p);
+	this->ready[p->PRIORITY].enqueue(p);
 	return true;
 }
 
@@ -304,4 +312,8 @@ bool scheduler_t::remove_from_ready(PCB * p) {
 		return false;
 	}
 	return (this->ready[p->PRIORITY].remove(p));
+}
+
+bool scheduler_t::validate_priority(int p){
+	return  0 < p && p < MAX_PRIORITY;
 }

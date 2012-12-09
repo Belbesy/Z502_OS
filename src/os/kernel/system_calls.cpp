@@ -29,6 +29,13 @@ extern 		Z502_ARG 	Z502_ARG6;
 INT32 NEXT_ID = 0;
 INT32 NUM_OF_PROCESSES = 1 ;
 
+map <string, PCB*> P_TABLE_BY_NAME;
+map <INT32, PCB*> P_TABLE_BY_ID;
+
+map<string,PCB*>::iterator NAME_TABLE_IT ;
+map<INT32,PCB*>::iterator ID_TABLE_IT ;
+
+PCB* current_process = NULL ;
 
 
 void execute_system_call(int call_type)

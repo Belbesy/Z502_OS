@@ -1,7 +1,11 @@
 
-#include "process_queue.h"
+#ifndef SCHED_H
+#define SCHED_H
 
-using namespace std;
+
+#include "process_queue.h"
+#include "../kernel/system_structs.h"
+
 
 #define STARVING_INTERVAL 1000
 #define SCHED_INTERVAL 50
@@ -23,6 +27,8 @@ class scheduler_t {
 public:
 	scheduler_t();
 
+	void init();
+
 	// scheduler;
 	void schedule();
 
@@ -35,7 +41,7 @@ public:
 	// sleep a process
 	bool sleep(PCB*, int , int*);
 
-	// resume a process
+	// resume a procestarvingss
 	bool resume(PCB*, int*);
 
 	// increases priority for a process with given id
@@ -54,7 +60,6 @@ public:
 
 	bool remove_from_ready(PCB *);
 
-	~scheduler_t();
 };
 
 // main scheduling function
@@ -63,3 +68,4 @@ void _wakeup(void *);
 // move process to urgent priority 0
 void _feed(void *);
 
+#endif

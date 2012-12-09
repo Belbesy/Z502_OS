@@ -1,25 +1,35 @@
-#include "../kernel/system_structs.h"
-#include <map>
+#ifndef PROCESS_QUEUE_H
+#define PROCESS_QUEUE_H
 
-struct q_item_t {
+
+#include "../kernel/system_structs.h"
+
+#include <map>
+#include <cstdlib>
+
+using namespace std;
+
+ struct q_item{
 	PCB * proc;
-	q_item_t* prev, *next;
+	q_item* prev, *next;
 };
 
-typedef q_item_t q_item;
 
-class process_queue {
-private:
-	map<int, PCB *> m; // map for easy retrieval
-	q_item head, tail;
-public:
-	process_queue();
+struct process_queue {
 
-	bool remove(PCB *); // remove by id;
-	bool queue(PCB *);
-	PCB* dequeue();
+	int len;
+	map<int, q_item *> m; // map for easy retrieval
+	q_item* head, *tail;
+
+	process_queue() ;
+
+	bool remove(PCB * p);
+
+	bool enqueue(PCB * p);
+	PCB* dequeue() ;
 
 	int size();
-	~process_queue();
 
 };
+
+#endif

@@ -15,6 +15,8 @@
 #include                 <string.h>
 
 
+extern alarm_manager_t alarm_manager;
+
 // array of interrupt handlers to be changed to map if possible
 int_handler int_handlers[MAX_HANDLERS]= {alarm_ih};
 
