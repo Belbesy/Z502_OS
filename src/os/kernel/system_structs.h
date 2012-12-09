@@ -20,8 +20,8 @@ typedef         int                             BOOL;
 
 
 
-#define MAX_NUM_OF_PROCESSES 100
-
+#define MAX_NUM_OF_PROCESSES 10
+#define MAX_NUM_OF_MESSAGES  20
 
 #define PROCESS_STATE_READY 		1
 #define PROCESS_STATE_SLEEPING 		2
@@ -42,14 +42,53 @@ struct PCB
 	void *CONTEXT;
 	void *STARTING_ADDRESS;
 	char* PROCESS_NAME;
-	INT32 PRIORITY;/*F2_H*/
+	INT32 PRIORITY;
 	INT32 ID;
 	INT32 PARENT_ID;
+	INT32 STATE;
 	list<INT32>* children;
 
-	INT32 STATE;
+	PCB()
+	{
+		CONTEXT = NULL;
+		STARTING_ADDRESS = NULL;
+		PROCESS_NAME = NULL ;
+		PRIORITY = 0 ;
+		ID = 0 ;
+		PARENT_ID = 0;
+		STATE = 0;
+		children = new list<INT32>;
+	}
 };
 
+struct MAIL
+{
+	INT32 SENDER_ID;
+	INT32 RECEIVER_ID;
+	INT32 SENDER_BUFFER_LENGTH;
+	char* MESSAGE;
+
+	MAIL()
+	{
+		SENDER_ID = 0;
+		RECEIVER_ID = 0;
+		SENDER_BUFFER_LENGTH = 0 ;
+		MESSAGE = NULL;
+	}
+};
+
+
+map <string, PCB*> 				P_TABLE_BY_NAME;
+map<string,PCB*>::iterator 		NAME_TABLE_IT ;
+
+map <INT32, PCB*> 				P_TABLE_BY_ID;
+map<INT32,PCB*>::iterator 		ID_TABLE_IT ;
+
+map<INT32, MAIL*>				SENDER_MAIL_BOX;
+map<INT32, MAIL*>::iterator		SENDER_MAIL_BOX_IT;
+
+map<INT32, MAIL*>				RECEIVER_MAIL_BOX;
+map<INT32, MAIL*>::iterator		RECEIVER_MAIL_BOX_IT;
 
 #endif
 

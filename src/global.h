@@ -164,6 +164,7 @@ typedef         int                             BOOL;
 #define			ERR_INVALID_PROCESS_ID					25L
 #define			ERR_MAX_NUM_EXCEEDED					26L
 #define			ERR_UNAUTHORIZED_TERMINATION			27L
+#define			ERR_BUFFER_LENGTH_EXCEEDED				28L
 
         /* Miscellaneous                                        */
 
