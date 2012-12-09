@@ -27,6 +27,18 @@ extern 		Z502_ARG 	Z502_ARG5;
 extern 		Z502_ARG 	Z502_ARG6;
 extern 		scheduler_t scheduler;
 
+extern map <string, PCB*> 				P_TABLE_BY_NAME;
+extern map<string,PCB*>::iterator 		NAME_TABLE_IT ;
+
+extern map <INT32, PCB*> 				P_TABLE_BY_ID;
+extern map<INT32,PCB*>::iterator 		ID_TABLE_IT ;
+
+extern map<INT32, MAIL*>				SENDER_MAIL_BOX;
+extern map<INT32, MAIL*>::iterator		SENDER_MAIL_BOX_IT;
+
+extern map<INT32, MAIL*>				RECEIVER_MAIL_BOX;
+extern map<INT32, MAIL*>::iterator		RECEIVER_MAIL_BOX_IT;
+
 INT32		BROADCAST_ID = 	-5;
 PCB* 		current_process = NULL ;
 
