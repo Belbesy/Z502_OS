@@ -29,6 +29,7 @@ public:
 
 	void init();
 
+	bool create(PCB* );
 	// scheduler;
 	void schedule();
 

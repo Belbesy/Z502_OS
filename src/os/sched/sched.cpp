@@ -296,6 +296,8 @@ bool scheduler_t::terminate(PCB* p, int* err) {
 
 	p->STATE = PROCESS_STATE_ZOMBIE;
 
+	this->schedule();
+
 	return true;
 }
 
@@ -316,4 +318,14 @@ bool scheduler_t::remove_from_ready(PCB * p) {
 
 bool scheduler_t::validate_priority(int p){
 	return  0 < p && p < MAX_PRIORITY;
+}
+
+
+bool scheduler_t::create(PCB* p){
+	if(p->STATE!=PROCESS_STATE_READY){
+		puts("INTERNAL_ERROR (scheduler->create): process passed wasn't ready");
+		return false;
+	}
+	add_to_ready(p);
+	return true;
 }

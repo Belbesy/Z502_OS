@@ -1,9 +1,6 @@
-/*
- * system_calls.cpp
- *
- *  Created on: Dec 6, 2012
- *      Author: mahmoudel-maghraby
- */
+#include 			 "../sched/sched.h"
+
+
 #include 			 "system_calls.h"
 #include			 "system_structs.h"
 #include             "../../global.h"
@@ -37,10 +34,11 @@ map<INT32,PCB*>::iterator ID_TABLE_IT ;
 
 PCB* current_process = NULL ;
 
+extern scheduler_t scheduler;
 
 void execute_system_call(int call_type)
 {
-
+	INT32    err;                   // err code;
 	INT32 	 time;					// Time Variable for GET_TIME_OF_DAY call
 	PCB* 	 new_pcb;				// Process Control Block Variable for CREATE_PROCESS call
     INT32 	 ID;					// ID Variable for TERMINATE_PROCESS call
@@ -63,6 +61,14 @@ void execute_system_call(int call_type)
 
 		*(INT32 *)Z502_ARG1.PTR =time;
 		break;
+
+	case SYSNUM_SLEEP:
+		time = (INT32) Z502_ARG1.VAL;
+		if(!scheduler.sleep(current_process, time, &err)){
+			puts("INTERNAL_ERROR! (system_calls.h->execute_system_call): didn't sleep");
+		}
+		break;
+
 
 	case SYSNUM_GET_PROCESS_ID:
 
@@ -128,7 +134,8 @@ void execute_system_call(int call_type)
 			 }
 			 else
 			 {
-				current_process->PRIORITY =(INT32)Z502_ARG2.VAL;
+				scheduler.change_priority(current_process, (INT32)Z502_ARG2.VAL, &err);
+				//TODO check for error
 			 }
 			break;
 		 }
@@ -237,6 +244,7 @@ void execute_system_call(int call_type)
 		P_TABLE_BY_NAME[new_pcb->PROCESS_NAME] = new_pcb;
 		P_TABLE_BY_ID[new_pcb->ID]= new_pcb;
 
+		scheduler.create(new_pcb);
 		break;
 
 
@@ -270,7 +278,10 @@ void execute_system_call(int call_type)
 				ID = current_process->ID;
 				terminate_process(ID);
 			 }
-			break;
+
+
+			// TODO check for error
+			 break;
 		 }
 
 		 /*
@@ -310,6 +321,8 @@ void execute_system_call(int call_type)
 					terminate_process(ID);						// terminate self
 				}
 			 }
+
+
 			break;
 		 }
 
@@ -356,6 +369,7 @@ void execute_system_call(int call_type)
 
 void terminate_process(INT32 ID)
 {
+	INT32 err;
 	ID_TABLE_IT = P_TABLE_BY_ID.find(ID);
 	if(ID_TABLE_IT != P_TABLE_BY_ID.end())			// ID found
 	{
@@ -375,6 +389,9 @@ void terminate_process(INT32 ID)
 //					delete temp->PROCESS_NAME;
 //					delete temp->STARTING_ADDRESS;
 //					delete temp->children;
+
+		scheduler.terminate(temp, &err);
+		//TODO: check for error from terminate
 		delete temp;
 		*(INT32 *)Z502_ARG2.PTR = ERR_SUCCESS;		// set error state to SUCCESS
 		NUM_OF_PROCESSES--;

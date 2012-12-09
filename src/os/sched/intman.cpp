@@ -40,7 +40,10 @@ void    os_interrupt_handler( void ) {
     // Now read the status of this device
     MEM_READ(Z502InterruptStatus, &status );
 
-    int_handlers[device_id](device_id, status);
+    if(device_id==TIMER_INTERRUPT)
+    	alarm_ih(0, status);
+    else
+    	puts("Unsupported device_id interrupt");
 
     // Clear out this device - we're done with it
     MEM_WRITE(Z502InterruptClear, &Index );

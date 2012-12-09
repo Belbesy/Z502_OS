@@ -56,6 +56,7 @@
 #include             "os/os.h"
 
 #include             "global.h"
+#include             "z502.h"
 #include             "syscalls.h"
 #include             "protos.h"
 #include             "string.h"
@@ -74,6 +75,11 @@ extern Z502_ARG      Z502_ARG3;
 extern Z502_ARG      Z502_ARG4;
 extern Z502_ARG      Z502_ARG5;
 extern Z502_ARG      Z502_ARG6;
+
+extern long      Z502_REG_1;
+extern long      Z502_REG_9;
+
+
 
 extern void          *TO_VECTOR [];
 extern INT32         CALLING_ARGC;
@@ -181,7 +187,6 @@ void    os_init( void )
     /*  This should be done by a "os_make_process" routine, so that
         test0 runs on a process recognized by the operating system.    */
 
-    ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1b, USER_MODE ));
-    ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
+    CREATE_PROCESS("test_base", test1b, 1, &Z502_REG_1, &Z502_REG_9);
 
 }                                               /* End of os_init       */
