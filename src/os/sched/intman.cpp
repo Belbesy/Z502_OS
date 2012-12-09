@@ -9,8 +9,7 @@
 
 #include                 "../../global.h"
 #include                 "../../syscalls.h"
-#include                 "../../z502.h"
-#include                 "../../protos.h"
+
 #include                 <stdio.h>
 #include                 <stdlib.h>
 #include                 <string.h>
@@ -46,3 +45,7 @@ void    os_interrupt_handler( void ) {
 }
 /* End of os_interrupt_handler */
 
+
+void alarm_ih(int device, int status){
+	alarm_manager.alarm_handler(device, status);
+}
