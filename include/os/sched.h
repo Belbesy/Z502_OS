@@ -4,7 +4,7 @@
 
 
 #include "process_queue.h"
-#include "../kernel/system_structs.h"
+#include "system_structs.h"
 
 
 #define STARVING_INTERVAL 1000
@@ -20,9 +20,12 @@
 //TODO:  to be moved to process struct.
 #define PROCESS_STATE_ZOMBIE 8
 
+
+typedef bool (*condition_predicate)(void *);
+
 class scheduler_t {
 
-	process_queue suspended, starving, blocked, ready[MAX_PRIORITY];
+	process_queue suspended, starving, timer, blocked, ready[MAX_PRIORITY];
 
 public:
 	scheduler_t();
@@ -30,8 +33,9 @@ public:
 	void init();
 
 	bool create(PCB* );
+
 	// scheduler;
-	void schedule();
+	bool schedule(PCB* calling, bool terminate, condition_predicate condition, void* arg, bool suspend);
 
 	// wakeup process after sleeping
 	void wakeup(PCB* );
@@ -59,7 +63,7 @@ public:
 
 	bool add_to_ready(PCB *);
 
-	bool remove_from_ready(PCB *);
+	bool remove_from_ready(PCB *, bool);
 
 };
 

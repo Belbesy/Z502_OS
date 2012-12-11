@@ -4,14 +4,15 @@
  *  Created on: Dec 6, 2012
  *      Author: mahmoudel-maghraby
  */
-#include 			 "../sched/sched.h"
-#include 			 "system_calls.h"
+#include 			 "os/sched.h"
+#include 			 "sys/system_calls.h"
 #include			 "system_structs.h"
 #include             "../../global.h"
-#include             "../../z502.h"
+#include             "z502/z502.h"
 #include             "../../syscalls.h"
-#include             "../../protos.h"
-#include             "../../string.h"
+#include             "protos.h"
+
+#include             <string.h>
 #include 			 <stdio.h>
 #include 			 <string.h>
 #include 			 <map>
@@ -89,6 +90,8 @@ void execute_system_call(int call_type)
 		{
 			puts("INTERNAL_ERROR! (system_calls.h->execute_system_call): didn't sleep");
 		}
+
+
 		break;
 
 	case SYSNUM_GET_PROCESS_ID:
@@ -222,6 +225,7 @@ void execute_system_call(int call_type)
 
 
 		new_pcb = new PCB;
+		new_pcb->STATE = PROCESS_STATE_READY;
 		new_pcb->PROCESS_NAME = (char*) Z502_ARG1.PTR ; 	// set process name
 		new_pcb->STARTING_ADDRESS = Z502_ARG2.PTR; 			// set process starting address
 		new_pcb->PRIORITY = Z502_ARG3.VAL; 					// set process initial priority
@@ -512,11 +516,16 @@ void create_root_process(void* starting_address, void* context)
 		root_process->ID = 0;		 									// set process ID
 		root_process->PARENT_ID = -1;									// set process parent ID to current process ID
 		root_process->CONTEXT = context ;
+		root_process->STATE = PROCESS_STATE_RUNNING;
 
 		P_TABLE_BY_NAME[root_process->PROCESS_NAME] = root_process;
 		P_TABLE_BY_ID[root_process->ID]= root_process;
 
 		current_process = root_process ;
+
+
+
+		NUM_OF_PROCESSES++;
 
 }
 

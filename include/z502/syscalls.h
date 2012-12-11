@@ -7,14 +7,14 @@
 
         Revision History:
         1.0 August 1990:        Initial release
-        1.1 Jan 1991:           Make system calls portable
-                                by using union of pointer
-                                and long.  Add incls for
+        1.1 Jan 1991:           Make system calls portable 
+                                by using union of pointer 
+                                and long.  Add incls for 
                                 scheduler_printer.
-        1.2 Dec 1991;           Allow interrupts to occur
-                                in user code and in CALL
+        1.2 Dec 1991;           Allow interrupts to occur 
+                                in user code and in CALL 
                                 statements.
-        1.5 Aug 1993;           Add READ_MODIFY &
+        1.5 Aug 1993;           Add READ_MODIFY & 
                                 DEFINE_SHARED_AREA support.
         2.0 Jan 2000;           Small changes
         2.1 May 2001;           Fix STEP macro.  DISK macros.
@@ -24,8 +24,6 @@
         3.11 Aug 2004:          Support for OS level locking
 	3.30 July 2006:         Modify POP_THE_STACK to apply to base only
 *********************************************************************/
-#ifndef SYSCALLS_H
-#define SYSCALLS_H
 
 #include        "stdio.h"
 
@@ -106,8 +104,8 @@ extern int      BaseThread();
 #define         MEM_READ( arg1, arg2 )                          \
 				{												\
                     SYS_CALL_CALL_TYPE = SYSNUM_MEM_READ;       \
-                    Z502_ARG1.VAL       = arg1;                 \
-                    Z502_ARG2.PTR       = (void *)arg2;         \
+                    Z502_ARG1.VAL       = arg1;             \
+                    Z502_ARG2.PTR       = (void *)arg2;     \
                     return;                                     \
                 }
 #endif
@@ -115,7 +113,7 @@ extern int      BaseThread();
 #define         MEM_READ( arg1, arg2 )   Z502_MEM_READ( arg1, arg2 )
 #endif 
 
-
+                                             
 #ifdef  USER
 #define         MEM_WRITE( arg1, arg2 )                         \
                 {                                               \
@@ -133,7 +131,7 @@ extern int      BaseThread();
 #define         READ_MODIFY( arg1, arg2, arg3, arg4 )           \
                 {                                               \
                     SYS_CALL_CALL_TYPE = SYSNUM_READ_MODIFY;    \
-                    Z502_ARG1.VAL       = arg1;                 \
+                    Z502_ARG1.VAL       = arg1;             \
                     Z502_ARG2.VAL       = arg2;             \
                     Z502_ARG3.VAL       = arg3;             \
                     Z502_ARG4.PTR       = (void *)arg4;     \
@@ -291,5 +289,3 @@ extern int      BaseThread();
 
 #define         SP_HEADER_STRING        \
 " Time Target Action  Run New Done       State Populations \n"
-
-#endif

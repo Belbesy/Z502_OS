@@ -472,33 +472,18 @@ void    do_memory_debug( INT16 invalidity, INT16 vpn )
 
                 Set a flag and call common code
 
-
     *****************************************************************/
 
-void    Z502_MEM_READ( long virtual_address, long *data_ptr )
+void    Z502_MEM_READ( INT32 virtual_address, INT32 *data_ptr )
     {
     ZCALL( mem_common( virtual_address, (char *)data_ptr, 
                        (BOOL)SYSNUM_MEM_READ ) ); 
 }                                       /* End  Z502_MEM_READ  */
 
 
-void    Z502_MEM_WRITE( long virtual_address, long *data_ptr )
-    {
-    ZCALL( mem_common( virtual_address, (char *)data_ptr, 
-                       (BOOL)SYSNUM_MEM_WRITE ) );
-}                                       /* End  Z502_MEM_WRITE  */
-
-
-void    Z502_MEM_READ( INT32 virtual_address, INT32 *data_ptr )
-    {
-    ZCALL( mem_common( virtual_address, (char *)data_ptr,
-                       (BOOL)SYSNUM_MEM_READ ) );
-}                                       /* End  Z502_MEM_READ  */
-
-
 void    Z502_MEM_WRITE( INT32 virtual_address, INT32 *data_ptr )
     {
-    ZCALL( mem_common( virtual_address, (char *)data_ptr,
+    ZCALL( mem_common( virtual_address, (char *)data_ptr, 
                        (BOOL)SYSNUM_MEM_WRITE ) );
 }                                       /* End  Z502_MEM_WRITE  */
 
@@ -706,13 +691,13 @@ void    memory_mapped_io( INT32 address, INT32 *data, BOOL read_or_write )
                  && MemoryMappedDiskState.buffer != (char *)-1 
                  && MemoryMappedDiskState.sector != -1 )
             {
-			if (MemoryMappedDiskState.action == 0)
-				hardware_read_disk((INT16) MemoryMappedIODiskDevice,
-						(INT16)MemoryMappedDiskState.sector,
-						MemoryMappedDiskState.buffer);
+                if ( MemoryMappedDiskState.action == 0 )
+                    hardware_read_disk( (INT16)MemoryMappedIODiskDevice, 
+                                  MemoryMappedDiskState.sector, 
+                                  MemoryMappedDiskState.buffer );
                 if ( MemoryMappedDiskState.action == 1 )
                     hardware_write_disk((INT16)MemoryMappedIODiskDevice, 
-                                 (INT16) MemoryMappedDiskState.sector,
+                                  MemoryMappedDiskState.sector, 
                                   MemoryMappedDiskState.buffer );
             }
             else
@@ -829,7 +814,7 @@ void    hardware_read_disk( INT16 disk_id, INT16 sector, char *buffer_ptr )
         memcpy( buffer_ptr, sector_ptr, PGSIZE );
 
         access_time = current_simulation_time + 100
-                  + abs( (int) disk_state[disk_id].last_sector - sector )/20;
+                  + abs( disk_state[disk_id].last_sector - sector )/20;
         hardware_stats.disk_reads[disk_id]++;
         hardware_stats.time_disk_busy[disk_id] 
                         += access_time - current_simulation_time;
@@ -924,7 +909,7 @@ void    hardware_write_disk( INT16 disk_id,INT16 sector, char *buffer_ptr )
         memcpy( sector_ptr, buffer_ptr, PGSIZE );
 
         access_time = (INT32)current_simulation_time + 100
-                    + abs( (int)disk_state[disk_id].last_sector - sector )/20;
+                    + abs( disk_state[disk_id].last_sector - sector )/20;
         hardware_stats.disk_writes[disk_id]++;
         hardware_stats.time_disk_busy[disk_id] 
                         += access_time - current_simulation_time;
@@ -2205,7 +2190,7 @@ int    CreateAThread( void *ThreadStartAddress, INT32 *data )
     ReturnCode = pthread_attr_setdetachstate( &Attribute, PTHREAD_CREATE_JOINABLE );
     if ( ReturnCode != FALSE )
         printf( "Error in pthread_attr_setdetachstate in CreateAThread\n" );
-    ReturnCode = pthread_create( &Thread, &Attribute, (void* (*)(void*))ThreadStartAddress, data );
+    ReturnCode = pthread_create( &Thread, &Attribute, ThreadStartAddress, data );
     if ( ReturnCode == EINVAL )                        /* Will return 0 if successful */
         printf( "ERROR doing pthread_create - The Thread, attr or sched param is wrong\n");
     if ( ReturnCode == EAGAIN )                        /* Will return 0 if successful */
@@ -2817,7 +2802,7 @@ int    main( int argc, char  *argv[] )
     Z502_MAKE_CONTEXT( &starting_context_ptr,  
                                         ( void *)os_init, KERNEL_MODE );
     Z502_CURRENT_CONTEXT            = NULL;
-    z502_machine_next_context_ptr       = (Z502CONTEXT* )starting_context_ptr;
+    z502_machine_next_context_ptr       = starting_context_ptr;
     POP_THE_STACK                       = TRUE;
 
     CreateAThread( (int *)hardware_interrupt, &EventLock );

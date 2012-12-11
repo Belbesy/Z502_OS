@@ -2,7 +2,7 @@
 #define PROCESS_QUEUE_H
 
 
-#include "../kernel/system_structs.h"
+#include "system_structs.h"
 
 #include <map>
 #include <cstdlib>

@@ -29,6 +29,8 @@ typedef         int                             BOOL;
 #define PROCESS_STATE_BLOCKED 		3 	// blocked by other process
 #define PROCESS_STATE_SUSPENDED 	4   // suspended by user
 
+#define PROCESS_STATE_RUNNING       5
+
 
 
 using namespace std;

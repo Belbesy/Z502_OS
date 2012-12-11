@@ -2,11 +2,13 @@
 #define OS_H
 
 
-#include             "./sched/alarm.h"
-#include             "./sched/sched.h"
-#include             "./sched/intman.h"
-#include             "./sched/faultman.h"
-#include             "./kernel/system_calls.h"
+#include             "alarm.h"
+#include             "sched.h"
+#include             "intman.h"
+
+#include             "system_calls.h"
+
+#include  			 <pthread.h>
 
 alarm_manager_t alarm_manager;
 scheduler_t scheduler;
@@ -22,4 +24,5 @@ map<INT32, MAIL*>::iterator		SENDER_MAIL_BOX_IT;
 
 map<INT32, MAIL*>				RECEIVER_MAIL_BOX;
 map<INT32, MAIL*>::iterator		RECEIVER_MAIL_BOX_IT;
+
 #endif

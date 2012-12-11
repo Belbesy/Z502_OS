@@ -24,8 +24,6 @@
         3.60 August 2012        Updates with student generated code to
                                 support MACs
 ****************************************************************************/
-#ifndef GLOBAL_H
-#define GLOBAL_H
 
 #define         CURRENT_REL                     "3.60"
 // #define         NT
@@ -36,7 +34,7 @@
 
 typedef         int                             INT32;
 typedef         unsigned int                   UINT32;
-typedef         short int                        INT16;
+typedef         short                           INT16;
 typedef         unsigned short                  UINT16;
 typedef         int                             BOOL;
 
@@ -158,13 +156,6 @@ typedef         int                             BOOL;
 #define         DEVICE_FREE                             7L
 #define         ERR_Z502_INTERNAL_BUG                   20L
 #define         ERR_OS502_GENERATED_BUG                 21L
-#define			ERR_INVALID_PROCESS_NAME				22L
-#define			ERR_INVALID_PROCESS_PRIORITY			23L
-#define			ERR_DUPLICATE_PROCESS_NAME				24L
-#define			ERR_INVALID_PROCESS_ID					25L
-#define			ERR_MAX_NUM_EXCEEDED					26L
-#define			ERR_UNAUTHORIZED_TERMINATION			27L
-#define			ERR_BUFFER_LENGTH_EXCEEDED				28L
 
         /* Miscellaneous                                        */
 
@@ -176,8 +167,6 @@ typedef         int                             BOOL;
 #define         USER_MODE                               (short)0
 #define         KERNEL_MODE                             (short)1
 
-
-#define        NEW(x)                                   ((x *) malloc(sizeof(x)));
 /*  This structure is used so that the hardware registers can be
     referenced both as pointers and as values.  Different system
     calls will use them in different ways.    See Appendix B, 3.1
@@ -188,5 +177,3 @@ typedef         union
     void        *PTR;
     long        VAL;
 } Z502_ARG;
-
-#endif
