@@ -2190,7 +2190,7 @@ int    CreateAThread( void *ThreadStartAddress, INT32 *data )
     ReturnCode = pthread_attr_setdetachstate( &Attribute, PTHREAD_CREATE_JOINABLE );
     if ( ReturnCode != FALSE )
         printf( "Error in pthread_attr_setdetachstate in CreateAThread\n" );
-    ReturnCode = pthread_create( &Thread, &Attribute, ThreadStartAddress, data );
+    ReturnCode = pthread_create( &Thread, &Attribute, (void* (*)(void*)) ThreadStartAddress, data );
     if ( ReturnCode == EINVAL )                        /* Will return 0 if successful */
         printf( "ERROR doing pthread_create - The Thread, attr or sched param is wrong\n");
     if ( ReturnCode == EAGAIN )                        /* Will return 0 if successful */
@@ -2802,7 +2802,7 @@ int    main( int argc, char  *argv[] )
     Z502_MAKE_CONTEXT( &starting_context_ptr,  
                                         ( void *)os_init, KERNEL_MODE );
     Z502_CURRENT_CONTEXT            = NULL;
-    z502_machine_next_context_ptr       = starting_context_ptr;
+    z502_machine_next_context_ptr       = (Z502CONTEXT * )starting_context_ptr;
     POP_THE_STACK                       = TRUE;
 
     CreateAThread( (int *)hardware_interrupt, &EventLock );

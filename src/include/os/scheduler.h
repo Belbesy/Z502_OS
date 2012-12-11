@@ -23,6 +23,9 @@
 
 typedef bool (*condition_predicate)(void *);
 
+class process_queue;
+struct PCB;
+
 class scheduler_t {
 
 	process_queue suspended, starving, timer, blocked, ready[MAX_PRIORITY];

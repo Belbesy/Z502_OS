@@ -16,6 +16,8 @@
                         REGs is long - didn't matter until trying
                         to store addresses.
 *********************************************************************/
+#ifndef Z502_H_
+#define Z502_H_
 
 #define         COST_OF_MEMORY_ACCESS           1L
 #define         COST_OF_MEMORY_MAPPED_IO        1L
@@ -127,3 +129,4 @@ typedef struct
     INT16               timer_in_use;
 } TIMER_STATE;
 
+#endif

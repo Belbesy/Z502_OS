@@ -1,14 +1,22 @@
-#include <os/sched/alarm.h>
 
+#include "alarmman.h"
+
+#include "global.h"
+#include "syscalls.h"
+#include "protos.h"
+#include "z502.h"
+
+
+#include <stdlib.h>
 #include <pthread.h>
+
 
 #define TIMER_INTERVAL  1// in milliseconds
 alarmable * turn_process;
 
-extern pthread_mutex_t scheduler_mutex;
 
 void z502_timer_set(int interval) {
-	pthread_mutex_lock(&scheduler_mutex);
+
 
 	int get_status, time;
 	bool done = false;
@@ -35,7 +43,7 @@ void z502_timer_set(int interval) {
 			break;
 		}
 	}
-	pthread_mutex_unlock(&scheduler_mutex);
+
 }
 
 alarmable::alarmable(long t, alarm_handler cb, void * r) {
@@ -49,7 +57,7 @@ alarm_manager_t::alarm_manager_t() {
 }
 
 void alarm_manager_t::init() {
-	pthread_mutex_init(&scheduler_mutex, NULL);
+
 }
 void alarm_manager_t::add_alarm(alarmable* alarm) {
 	if (alarms.size()) {

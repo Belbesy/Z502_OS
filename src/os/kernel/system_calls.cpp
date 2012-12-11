@@ -4,12 +4,14 @@
  *  Created on: Dec 6, 2012
  *      Author: mahmoudel-maghraby
  */
-#include 			 "os/sched.h"
-#include 			 "sys/system_calls.h"
+#include			"const.h"
+#include 			"alarmman.h"
+#include 			 "scheduler.h"
+#include 			 "system_calls.h"
 #include			 "system_structs.h"
-#include             "../../global.h"
-#include             "z502/z502.h"
-#include             "../../syscalls.h"
+#include             "global.h"
+#include             "z502.h"
+#include             "syscalls.h"
 #include             "protos.h"
 
 #include             <string.h>
@@ -20,6 +22,7 @@
 #include 			 <cstdlib>
 using namespace 	 std;
 
+
 extern 		Z502_ARG 	Z502_ARG1;
 extern 		Z502_ARG 	Z502_ARG2;
 extern 		Z502_ARG 	Z502_ARG3;
@@ -28,17 +31,20 @@ extern 		Z502_ARG 	Z502_ARG5;
 extern 		Z502_ARG 	Z502_ARG6;
 extern 		scheduler_t scheduler;
 
-extern map <string, PCB*> 				P_TABLE_BY_NAME;
-extern map<string,PCB*>::iterator 		NAME_TABLE_IT ;
+alarm_manager_t alarm_manager;
+scheduler_t scheduler;
 
-extern map <INT32, PCB*> 				P_TABLE_BY_ID;
-extern map<INT32,PCB*>::iterator 		ID_TABLE_IT ;
+ map <string, PCB*> 				P_TABLE_BY_NAME;
+ map<string,PCB*>::iterator 		NAME_TABLE_IT ;
 
-extern map<INT32, MAIL*>				SENDER_MAIL_BOX;
-extern map<INT32, MAIL*>::iterator		SENDER_MAIL_BOX_IT;
+map <INT32, PCB*> 				P_TABLE_BY_ID;
+map<INT32,PCB*>::iterator 		ID_TABLE_IT ;
 
-extern map<INT32, MAIL*>				RECEIVER_MAIL_BOX;
-extern map<INT32, MAIL*>::iterator		RECEIVER_MAIL_BOX_IT;
+ map<INT32, MAIL*>				SENDER_MAIL_BOX;
+ map<INT32, MAIL*>::iterator		SENDER_MAIL_BOX_IT;
+
+ map<INT32, MAIL*>				RECEIVER_MAIL_BOX;
+ map<INT32, MAIL*>::iterator		RECEIVER_MAIL_BOX_IT;
 
 INT32		BROADCAST_ID = 	-5;
 PCB* 		current_process = NULL ;
@@ -114,7 +120,13 @@ void execute_system_call(int call_type)
 			break;
 		}
 
-		/*
+		/*#define			ERR_INVALID_PROCESS_NAME				22L
+#define			ERR_INVALID_PROCESS_PRIORITY			23L
+#define			ERR_DUPLICATE_PROCESS_NAME				24L
+#define			ERR_INVALID_PROCESS_ID					25L
+#define			ERR_MAX_NUM_EXCEEDED					26L
+#define			ERR_UNAUTHORIZED_TERMINATION			27L
+#define			ERR_BUFFER_LENGTH_EXCEEDED				28L
 		 STAGE(2): Search for process by name
 		 */
 

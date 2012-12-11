@@ -1,4 +1,4 @@
-#include "../kernel/system_structs.h"
+#include "system_structs.h"
 #include "process_queue.h"
 #include <map>
 #include <cstdlib>

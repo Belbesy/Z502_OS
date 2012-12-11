@@ -20,10 +20,8 @@
         3.1 August   2004: hardware interrupt runs on separate thread
         3.11 August  2004: Support for OS level locking
 ************************************************************************/
-
-
-#include             "os/os.h"
-
+#include			"system_calls.h"
+#include			"intman.h"
 #include             "global.h"
 #include             "syscalls.h"
 #include             "protos.h"
@@ -56,40 +54,69 @@ char                 *call_names[] = { "mem_read ", "mem_write",
                             "disk_wrt ", "def_sh_ar" };
 
 
+/************************************************************************
+    INTERRUPT_HANDLER
+        When the Z502 gets a hardware interrupt, it transfers control to
+        this routine in the OS.
+************************************************************************/
+void    interrupt_handler( void ) {
+    INT32              device_id;
+    INT32              status;
+    INT32              Index = 0;
+    static BOOL        remove_this_in_your_code = TRUE;   /** TEMP **/
+    static INT32       how_many_interrupt_entries = 0;    /** TEMP **/
 
+    // Get cause of interrupt
+    MEM_READ(Z502InterruptDevice, &device_id );
+    // Set this device as target of our query
+    MEM_WRITE(Z502InterruptDevice, &device_id );
+    // Now read the status of this device
+    MEM_READ(Z502InterruptStatus, &status );
+
+    CALL(os_interrupt_handler(device_id, status));
+
+    // Clear out this device - we're done with it
+    MEM_WRITE(Z502InterruptClear, &Index );
+}                                       /* End of interrupt_handler */
+/************************************************************************
+    FAULT_HANDLER
+        The beginning of the OS502.  Used to receive hardware faults.
+************************************************************************/
+
+void    fault_handler( void )
+    {
+
+
+    INT32       device_id;
+    INT32       status;
+    INT32       Index = 0;
+
+    // Get cause of interrupt
+    MEM_READ(Z502InterruptDevice, &device_id );
+    // Set this device as target of our query
+    MEM_WRITE(Z502InterruptDevice, &device_id );
+    // Now read the status of this device
+    MEM_READ(Z502InterruptStatus, &status );
+
+    printf( "Fault_handler: Found vector type %d with value %d\n",
+                   device_id, status );
+    CALL(os_fault_handler(device_id, status));
+    // Clear out this device - we're done with it
+    MEM_WRITE(Z502InterruptClear, &Index );
+}                                       /* End of fault_handler */
 
 /************************************************************************
- 	 INTERRUPT_HANDLER
- 	 	 call interrupt handler in os/intman
- ************************************************************************/
+    SVC
+        The beginning of the OS502.  Used to receive software interrupts.
+        All system calls come to this point in the code and are to be
+        handled by the student written code here.
+************************************************************************/
 
-void interrupt_handler(void) {
-	os_interrupt_handler();
-}
-/* End of interrupt_handler */
-
-
-/************************************************************************
- 	 FAULT_HANDLER
- 	 	 The beginning of the OS502.  Used to receive hardware faults.
- ************************************************************************/
-
-void fault_handler(void) {
-	os_fault_handler();
-}
-/* End of fault_handler */
-
-/************************************************************************
- 	 SVC
- 	 	 executes system calls
- ************************************************************************/
-
-void svc(void) {
+void    svc( void ) {
 	int call_type = SYS_CALL_CALL_TYPE;
 	// Call the execute _system_call method
 	CALL(execute_system_call(call_type));
-}
-// End of svc
+}                                               // End of svc
 
 /************************************************************************
     OS_SWITCH_CONTEXT_COMPLETE
@@ -135,8 +162,6 @@ void    os_init( void )
     TO_VECTOR[TO_VECTOR_FAULT_HANDLER_ADDR] = (void *)fault_handler;
     TO_VECTOR[TO_VECTOR_TRAP_HANDLER_ADDR]  = (void *)svc;
 
-    alarm_manager.init();
-    scheduler.init();
     /*  Determine if the switch was set, and if so go to demo routine.  */
 
     if (( CALLING_ARGC > 1 ) && ( strcmp( CALLING_ARGV[1], "sample" ) == 0 ) )

@@ -5,10 +5,11 @@
 
 
 #include                 "intman.h"
-#include                 "alarm.h"
+#include                 "alarmman.h"
 
-#include                 "../../global.h"
-#include                 "../../syscalls.h"
+#include                 "global.h"
+#include                 "syscalls.h"
+#include                 "protos.h"
 
 #include                 <stdio.h>
 #include                 <stdlib.h>
@@ -28,25 +29,21 @@ int_handler int_handlers[MAX_HANDLERS]= {alarm_ih};
 
         manages all interrupts and passes it to the responsible handler
 ************************************************************************/
-void    os_interrupt_handler( void ) {
-    INT32              device_id;
-    INT32              status;
+void    os_interrupt_handler(int device_id, int status) {
     INT32              Index = 0;
 
-    // Get cause of interrupt
-    MEM_READ(Z502InterruptDevice, &device_id );
-    // Set this device as target of our query
-    MEM_WRITE(Z502InterruptDevice, &device_id );
-    // Now read the status of this device
-    MEM_READ(Z502InterruptStatus, &status );
+
 
     if(device_id==TIMER_INTERRUPT)
     	alarm_ih(0, status);
     else
     	puts("Unsupported device_id interrupt");
 
-    // Clear out this device - we're done with it
-    MEM_WRITE(Z502InterruptClear, &Index );
+
+}
+
+void os_fault_handler(int a, int b){
+
 }
 /* End of os_interrupt_handler */
 

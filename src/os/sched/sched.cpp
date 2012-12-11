@@ -1,12 +1,11 @@
-#include "sched.h"
 
-#include "../../global.h"
-#include "../../syscalls.h"
-#include "../../protos.h"
+#include "global.h"
+#include "syscalls.h"
+#include "protos.h"
 
-#include "../kernel/system_structs.h"
-
-#include "alarm.h"
+#include "system_structs.h"
+#include "scheduler.h"
+#include "alarmman.h"
 #include "process_queue.h"
 
 #include <cstdio>

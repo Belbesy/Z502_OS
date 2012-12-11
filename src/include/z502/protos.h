@@ -17,6 +17,8 @@
 *********************************************************************/
 
 /*                      ENTRIES in base.c                         */
+#ifndef PROTOS_H_
+#define PROTOS_H_
 
 void   interrupt_handler( void );
 void   fault_handler( void );
@@ -91,3 +93,5 @@ int    SignalCondition( UINT32, char *  );
 void   DoSleep( INT32 millisecs );
 void   HandleWindowsError( );
 void   GoToExit( int );
+
+#endif
