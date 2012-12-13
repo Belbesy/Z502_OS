@@ -87,7 +87,7 @@
 #define                   HARDWARE_VERSION  "3.60"
 // #define                 __USE_UNIX98
 // #define                  DEBUG_LOCKS
-// #define                  DEBUG_CONDITION
+ #define                  DEBUG_CONDITION
 #include                 "global.h"
 #include                 "syscalls.h"
 #include                 "z502.h"
@@ -1487,8 +1487,7 @@ void    hardware_interrupt( void  )
 
         GetLock ( HardwareLock , "hardware_interrupt-2");
         NumberOfInterruptsStarted++;
-        get_next_ordered_event(&time_of_event, &event_type, 
-                               &event_error, &local_error);
+        get_next_ordered_event(&time_of_event, &event_type,  &event_error, &local_error);
         if ( local_error != 0 )
         {
             printf( "In hardware_interrupt we expected to find an event\n");

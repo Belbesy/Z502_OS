@@ -74,8 +74,8 @@ void    sample_code( void )
 
     /*********************************************************************
       Show the interface to the delay timer.
-      Eventually the timer will interrupt ( in base.c there's a handler for 
-      this ), but here in sample_code.c we're merely showing the interface 
+      Eventually the timer will interrupt ( in base.c there's a handler for
+      this ), but here in sample_code.c we're merely showing the interface
       to start the call.
     *********************************************************************/
     MEM_READ( Z502TimerStatus, &Status );
@@ -110,7 +110,7 @@ void    sample_code( void )
  //   ZCALL( Z502_IDLE() );           //  Let the interrupt for this timer occur
 
 
-    /*  The interrupt handler will have exercised the code doing 
+    /*  The interrupt handler will have exercised the code doing
         Z502InterruptDevice,  Z502InterruptStatus, and Z502InterruptClear.
         But they will have been tested only for "correct" usage.
         Let's try a few erroneous/illegal operations.          */
@@ -134,16 +134,16 @@ void    sample_code( void )
     ZCALL( MEM_READ( Z502ClockStatus, &Temp ) );
     ZCALL( MEM_READ( Z502ClockStatus, &Temp1 ) );
     if ( Temp1 > Temp )
-        printf( "The clock time incremented correctly - %d1, %d2\n", 
+        printf( "The clock time incremented correctly - %d1, %d2\n",
                  Temp, Temp1 );
     else
-        printf( "The clock time did NOT increment correctly - %d1, %d2\n", 
+        printf( "The clock time did NOT increment correctly - %d1, %d2\n",
                  Temp, Temp1 );
 
     /*********************************************************************
     Show the interface to the disk read and write.
-    Eventually the disk will interrupt ( in base.c there's a handler for 
-    this ), but here in sample_code.c we're merely showing the interface 
+    Eventually the disk will interrupt ( in base.c there's a handler for
+    this ), but here in sample_code.c we're merely showing the interface
     to start the call.
     *********************************************************************/
 
@@ -172,17 +172,17 @@ void    sample_code( void )
     else
         printf( "Got erroneous result for Disk Status\n" );
 
-    /* Wait until the disk "finishes" the write. the write is an 
+    /* Wait until the disk "finishes" the write. the write is an
        "unpended-io", meaning the call returns before the work is
-       completed.  By doing the IDLE here, we wait for the disk 
+       completed.  By doing the IDLE here, we wait for the disk
        action to complete.    */
     MEM_WRITE( Z502DiskSetID, &disk_id );
     MEM_READ( Z502DiskStatus, &Temp );
     while( Temp != DEVICE_FREE )  {
-        ZCALL( Z502_IDLE() );       
+        ZCALL( Z502_IDLE() );
         MEM_READ( Z502DiskStatus, &Temp );
     }
-    /* Now we read the data back from the disk.  If we're lucky, 
+    /* Now we read the data back from the disk.  If we're lucky,
        we'll read the same thing we wrote!                     */
 
     MEM_WRITE( Z502DiskSetSector, &sector );
@@ -196,7 +196,7 @@ void    sample_code( void )
     MEM_WRITE( Z502DiskSetID, &disk_id );
     MEM_READ( Z502DiskStatus, &Temp );
     while( Temp != DEVICE_FREE )  {
-        ZCALL( Z502_IDLE() );       
+        ZCALL( Z502_IDLE() );
         MEM_READ( Z502DiskStatus, &Temp );
     }
 
@@ -209,8 +209,8 @@ void    sample_code( void )
     Temp = 0;                        // Must be set to 0
     MEM_WRITE( Z502DiskStart, &Temp );
     // Try reading the status without setting an ID
-    MEM_READ( Z502DiskStatus, &Temp );    
-    if ( Temp == ERR_BAD_DEVICE_ID )       
+    MEM_READ( Z502DiskStatus, &Temp );
+    if ( Temp == ERR_BAD_DEVICE_ID )
         printf( "Got expected result for Disk Status when using no ID\n" );
     else
         printf( "Got erroneous result for Disk Status when using no ID\n" );
@@ -219,7 +219,7 @@ void    sample_code( void )
     disk_id = 999;
     MEM_WRITE( Z502DiskSetID, &disk_id );
     MEM_READ( Z502DiskStatus, &Temp );
-    if ( Temp == ERR_BAD_DEVICE_ID )        
+    if ( Temp == ERR_BAD_DEVICE_ID )
         printf( "Got expected result for Disk Status when using bad ID\n" );
     else
         printf( "Got erroneous result for Disk Status when using bad ID\n" );
@@ -300,7 +300,7 @@ void    sample_code( void )
         MEM_READ( Z502DiskStatus, &Temp );
         while ( Temp == DEVICE_IN_USE )        // Disk should report being used
         {
-            //ZCALL( Z502_IDLE() );       
+            //ZCALL( Z502_IDLE() );
             DoSleep(50);
         }
     }
@@ -309,15 +309,15 @@ void    sample_code( void )
 
     /*********************************************************************
     Show the interface to read and write of real memory
-        It turns out, that though these are hardware calls, the Z502 
+        It turns out, that though these are hardware calls, the Z502
         assumes the calls are being made in user mode.  Because the
-        process we're running here in "sample" is in kernel mode, 
-        the calls don't work correctly.  For working examples of 
-        these calls, see test2a.    
+        process we're running here in "sample" is in kernel mode,
+        the calls don't work correctly.  For working examples of
+        these calls, see test2a.
     *********************************************************************/
 
     Z502_PAGE_TBL_LENGTH = 64;
-    Z502_PAGE_TBL_ADDR 
+    Z502_PAGE_TBL_ADDR
         = (UINT16 *)calloc( sizeof(UINT16), Z502_PAGE_TBL_LENGTH );
     i = PTBL_VALID_BIT;
     Z502_PAGE_TBL_ADDR[0] = (UINT16)i;
@@ -332,7 +332,7 @@ void    sample_code( void )
 
     /*********************************************************************
       This is the interface to the locking mechanism.  These are hardware
-      interlocks.  We need to test that they work here.  This is the 
+      interlocks.  We need to test that they work here.  This is the
       interface we'll be using.
 
       void    Z502_READ_MODIFY( INT32 VirtualAddress, INT32 NewLockValue,
@@ -430,8 +430,8 @@ void    sample_code( void )
     printf( "++++  END of hardware interlock code  ++++\n\n");
 
     /*********************************************************************
-    Show the interface to the CONTEXT calls.   We aren't going to do a 
-    SWITCH_CONTEXT here, because that would cause us to start a 
+    Show the interface to the CONTEXT calls.   We aren't going to do a
+    SWITCH_CONTEXT here, because that would cause us to start a
     process in a strange place and we might never return here.
 
     But we do all the setup required.
@@ -441,7 +441,7 @@ void    sample_code( void )
 
     starting_address = (void *)starting_point_for_new_context;
     kernel_or_user = USER_MODE;
-    ZCALL( Z502_MAKE_CONTEXT( &context_pointer, 
+    ZCALL( Z502_MAKE_CONTEXT( &context_pointer,
                                      starting_address, kernel_or_user ) );
     ZCALL( Z502_DESTROY_CONTEXT( &context_pointer ) );
 
@@ -474,11 +474,11 @@ void    sample_code( void )
 
     for ( j = 0; j < 64; j = j + 2 )
         {
-    MP_setup( (INT32)(j), (INT32)(j / 2) % 10, 
+    MP_setup( (INT32)(j), (INT32)(j / 2) % 10,
               (INT32)j*16+10, (INT32)(j / 2) % 8 );
     }
     MP_print_line();
-    
+
     /*********************************************************************
                 Show how the skewed random numbers work on this platform.
     *********************************************************************/
@@ -504,12 +504,12 @@ void    sample_code( void )
 
     /*********************************************************************
                 Show the interface to the Z502_HALT.
-        Note that the program will end NOW, since we don't return 
+        Note that the program will end NOW, since we don't return
         from the command.
     *********************************************************************/
 
     ZCALL( Z502_HALT( ) );
-    
+
 }
 
 void    starting_point_for_new_context( void )

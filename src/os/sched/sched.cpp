@@ -1,4 +1,3 @@
-
 #include "global.h"
 #include "syscalls.h"
 #include "protos.h"
@@ -16,9 +15,6 @@
 
 extern alarm_manager_t alarm_manager;
 extern scheduler_t scheduler;
-
-extern pthread_mutex_t scheduler_mutex;
-extern pthread_cond_t scheduler_cond;
 
 bool sleeping_waiting;
 bool wake_up_time(void * data) {
@@ -85,9 +81,7 @@ bool scheduler_t::schedule(PCB* calling, bool save, condition_predicate conditio
 	}
 
 	if (p) {
-printf("da5el %d\n", p->ID);
 		Z502_SWITCH_CONTEXT(save, &p->CONTEXT);
-		printf("5lst %d\n", p->ID);
 		ret = true;
 	} else {
 
@@ -99,8 +93,17 @@ printf("da5el %d\n", p->ID);
 			} else {
 
 				Z502_IDLE();
-
+INT32 result;
+		extern INT32 lock;
+		lock = 1;
+		//printf("============locked ?  %d\n", lock);
+		while(lock){
+			printf("============locked!\n");
+		}
+				Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &result);
 				calling->STATE = PROCESS_STATE_RUNNING;
+
+				Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &result);
 				ret = true;
 			}
 		} else {
@@ -133,13 +136,15 @@ bool scheduler_t::sleep(PCB* p, int time, int* err) {
 	}
 
 	// remove from ready queue
+
 	this->remove_from_ready(p, false);
-
-	alarmable* wakeup_alarm = new alarmable(time, _wakeup, p);
-	alarm_manager.add_alarm(wakeup_alarm);
-
+	INT32 result;
+	Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &result);
 	// update process state
 	p->STATE = PROCESS_STATE_SLEEPING;
+	alarmable* wakeup_alarm = new alarmable(time, _wakeup, p);
+	alarm_manager.add_alarm(wakeup_alarm);
+	Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &result);
 	// no error occured
 	*err = 0;
 	this->schedule(p, true, wake_up_time, wakeup_alarm, false);

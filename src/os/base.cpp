@@ -87,22 +87,6 @@ void    fault_handler( void )
     {
 
 
-    INT32       device_id;
-    INT32       status;
-    INT32       Index = 0;
-
-    // Get cause of interrupt
-    MEM_READ(Z502InterruptDevice, &device_id );
-    // Set this device as target of our query
-    MEM_WRITE(Z502InterruptDevice, &device_id );
-    // Now read the status of this device
-    MEM_READ(Z502InterruptStatus, &status );
-
-    printf( "Fault_handler: Found vector type %d with value %d\n",
-                   device_id, status );
-    CALL(os_fault_handler(device_id, status));
-    // Clear out this device - we're done with it
-    MEM_WRITE(Z502InterruptClear, &Index );
 }                                       /* End of fault_handler */
 
 /************************************************************************
@@ -177,7 +161,7 @@ void    os_init( void )
 
     ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1c, USER_MODE ));
 
-    CALL(create_root_process((void *)test1c, next_context));
+    CALL(create_root_process((void *)test1a, next_context));
 
     ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
 

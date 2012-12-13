@@ -26,7 +26,7 @@ void z502_timer_set(int interval) {
 		switch (get_status) {
 		case DEVICE_IN_USE:
 			// this shouldn't happen, this method is the only user of the timer
-		//	printf("SYSTEM INTERNAL ERROR (alarm.c) : accessing timer while in use!\n");
+		printf("SYSTEM INTERNAL ERROR (alarm.c) : accessing timer while in use!\n");
 			break;
 		case DEVICE_FREE:
 			// device is free, this should be the case always
@@ -46,10 +46,10 @@ void z502_timer_set(int interval) {
 
 }
 
-alarmable::alarmable(long t, alarm_handler cb, void * r) {
+alarmable::alarmable(long t, alarm_handler cb, PCB * r) {
 	time = t;
 	call_back = cb;
-	r = ref;
+	ref = r;
 }
 
 alarm_manager_t::alarm_manager_t() {

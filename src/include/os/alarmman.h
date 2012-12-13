@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <list>
+#include <system_structs.h>
 
 
 using namespace std;
@@ -13,9 +14,9 @@ struct alarmable {
 
 	long time;
 	alarm_handler call_back;
-	void* ref;
+	PCB* ref;
 
-	alarmable(long t, alarm_handler cb, void * r);
+	alarmable(long t, alarm_handler cb, PCB * r);
 };
 
 class alarm_manager_t {

@@ -112,7 +112,7 @@ extern int      BaseThread();
                 }
 #endif
 #ifndef  USER
-#define         MEM_READ( arg1, arg2 )   Z502_MEM_READ( arg1, arg2 )
+#define         MEM_READ( arg1, arg2 )   Z502_MEM_READ( (INT32 ) (arg1), (INT32 *) (arg2) )
 #endif 
 
                                              
