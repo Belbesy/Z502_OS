@@ -53,14 +53,14 @@ public:
 
 
 	// resume a procestarvingss
-	bool resume(PCB*, int*);
+	void resume(PCB*, int*);
 
 	// increases priority for a process with given id
-	bool change_priority(PCB*, int, int*);
+	void change_priority(PCB*, int, int*);
 
 	// suspend a process
-	bool suspend(PCB*, int*);
-
+	void suspend(PCB*, int*);
+	PCB* get_waiting_for_message(INT32);
 };
 
 // main scheduling function

@@ -551,8 +551,11 @@ void test1f(void) {
 
 	STEP( 14)
 		SLEEP( (INT32)10000);
-
 	STEP( 15)
+		GET_TIME_OF_DAY(&Z502_REG_2);
+
+	STEP( 16)
+		printf("Test 1f Terminated Successfully at time %d.\n", Z502_REG_2);
 		TERMINATE_PROCESS(-1, &Z502_REG_9);
 
 	} /* End of SELECT        */
@@ -599,6 +602,10 @@ void test1g(void) {
 
 	STEP( 4)
 		error_expected(Z502_REG_9, "CHANGE_PRIORITY");
+	STEP( 5)
+			GET_TIME_OF_DAY(&Z502_REG_2);
+	STEP( 6)
+		printf("Test 1g Terminated Successfully at time %d.\n", Z502_REG_2);
 		// Change made - I assume both proce
 		TERMINATE_PROCESS(-2, &Z502_REG_9);
 

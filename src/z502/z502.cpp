@@ -2817,17 +2817,18 @@ int    main( int argc, char  *argv[] )
         while ( POP_THE_STACK == TRUE )
             change_context();
 
-        if ( SYS_CALL_CALL_TYPE == SYSNUM_MEM_READ )
+      //  printf("%s\n", (Z502_MODE ==USER_MODE ? "User mode" : "Kernel mode" ));
+
+        if ( SYS_CALL_CALL_TYPE == SYSNUM_MEM_READ  )
             Z502_MEM_READ( Z502_ARG1.VAL, (INT32 *)Z502_ARG2.PTR );
         if ( SYS_CALL_CALL_TYPE == SYSNUM_MEM_WRITE )
             Z502_MEM_WRITE( Z502_ARG1.VAL, (INT32 *)Z502_ARG2.PTR );
         if ( SYS_CALL_CALL_TYPE == SYSNUM_READ_MODIFY ){
-         puts("------------------- da5alt hena");
         	Z502_READ_MODIFY( Z502_ARG1.VAL, Z502_ARG2.VAL,
                               Z502_ARG3.VAL, (INT32 *)Z502_ARG4.PTR );
         }
-        if (   SYS_CALL_CALL_TYPE != SYSNUM_MEM_WRITE 
-            && SYS_CALL_CALL_TYPE != SYSNUM_MEM_READ 
+        if (   SYS_CALL_CALL_TYPE != SYSNUM_MEM_WRITE
+            && SYS_CALL_CALL_TYPE != SYSNUM_MEM_READ
             && SYS_CALL_CALL_TYPE != SYSNUM_READ_MODIFY )
             software_trap();
 

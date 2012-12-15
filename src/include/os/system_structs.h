@@ -47,11 +47,20 @@ struct PCB
 	void *CONTEXT;
 	void *STARTING_ADDRESS;
 	char* PROCESS_NAME;
+
 	INT32 PRIORITY;
 	INT32 ID;
 	INT32 PARENT_ID;
 	INT32 STATE;
 	list<INT32>* children;
+
+	bool waiting_for_message;
+	INT32 waiting_for;
+	char* mail;
+	INT32 allowed_mail_length;
+	INT32* recieved_from;
+	INT32* recieved_length;
+	INT32* mailing_error;
 
 	PCB()
 	{
@@ -63,6 +72,15 @@ struct PCB
 		PARENT_ID = 0;
 		STATE = 0;
 		children = new list<INT32>;
+
+
+		waiting_for_message = false;
+		waiting_for = 0;
+		mail = NULL;
+		allowed_mail_length = 0;
+		recieved_from = NULL;
+		recieved_length = NULL;
+		mailing_error=NULL;
 	}
 };
 

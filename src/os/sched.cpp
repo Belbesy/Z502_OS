@@ -10,21 +10,21 @@
 #include "syscalls.h"
 #include "z502.h"
 #include "protos.h"
-#include "base.h"
+#include "const.h"
+
 #include <cstdio>
 #include <pthread.h>
 #include <list>
 #include <queue>
 #include <map>
-#define DEBUG_OS
-#define LOG_OS
+
 extern alarm_manager_t alarm_manager;
 extern scheduler_t scheduler;
 extern PCB* current_process;
 
 PCB* last_used;
 
-char process_state[10][50] = { "CREATED", "READY", "SLEEPING", "BLOCKED", "SUSPENDED", "RUNNING" , "ZOMBIE"};
+char process_state[10][50] = { "CREATED", "READY", "SLEEPING", "BLOCKED", "SUSPENDED", "RUNNING", "ZOMBIE" };
 
 extern bool int_lock;
 
@@ -93,64 +93,86 @@ void scheduler_t::wakeup(PCB* p) {
 }
 
 void scheduler_t::schedule(PCB * p) {
-	INT32 lock_success;
-	if (p->STATE == PROCESS_STATE_RUNNING || p!=current_process) {
-		return;
-	}
-	Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &lock_success);
-#ifdef LOG_OS
-	printf("\t=> Rescheduling on process {id: %d, name:%s} with state (%d,%s).\n", p->ID, p->PROCESS_NAME,p->STATE, process_state[p->STATE]);
-#endif
 	PCB * next = NULL;
+	INT32 lock_success;
+	INT32 success;
 
 	int starving_size;
+	int ready_size;
+
+	ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &success));
+
+	CALL(ready.size(&ready_size));
 	CALL(starving.size(&starving_size));
-	if (starving_size) {
-		CALL(starving.dequeue(&next));
-	} else {
-		int ready_size;
-		CALL(ready.size(&ready_size));
-		if (ready_size) {
+#ifdef LOG_OS
+	printf("\t=> Rescheduling on process {id: %d, name:%s} with state (%d,%s). ready queue size(%d)\n", p->ID, p->PROCESS_NAME, p->STATE, process_state[p->STATE], ready_size);
+#endif
+
+	switch (p->STATE) {
+
+	case PROCESS_STATE_READY:
+	case PROCESS_STATE_CREATED:
+	case PROCESS_STATE_SUSPENDED:
+	case PROCESS_STATE_BLOCKED:
+	case PROCESS_STATE_SLEEPING:
+	case PROCESS_STATE_ZOMBIE:
+
+		if (starving_size) {
+			CALL(starving.dequeue(&next));
+		} else if (ready_size) {
 			CALL(ready.dequeue(&next));
 		}
-	}
 
+		if (next) {
+			current_process = next;
+			current_process->STATE = PROCESS_STATE_RUNNING;
 
-	if (next) {
-		current_process = next;
-		current_process->STATE = PROCESS_STATE_RUNNING;
-
-		Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &lock_success);
-		Z502_SWITCH_CONTEXT(SWITCH_CONTEXT_SAVE_MODE, &next->CONTEXT);
+			Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &lock_success);
+			Z502_SWITCH_CONTEXT(SWITCH_CONTEXT_SAVE_MODE, &next->CONTEXT);
 #ifdef LOG_OS
-		printf("\t\t=> => Currently running process {id: %d, name:%s}.\n", current_process->ID, current_process->PROCESS_NAME);
+			printf("\t\t=> => Currently running process {id: %d, name:%s}. old was {id%d, name:%s}\n", current_process->ID, current_process->PROCESS_NAME, p->ID, p->PROCESS_NAME);
 #endif
-		// unlock and leave
+			// unlock and leave
 
-		return;
-	} else {
-		Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &lock_success);
-		// unlock before calling idle to allow handler to be locked
+			return;
+		} else {
+			Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &lock_success);
+			// unlock before calling idle to allow handler to be locked
 
 #ifdef LOG_OS
-		printf("\t\t=> => Process {id: %d, name:%s} is waiting for interrupt handler to finish.\n", current_process->ID, current_process->PROCESS_NAME);
+			printf("\t\t=> => Process {id: %d, name:%s} is waiting for interrupt handler to finish.\n", current_process->ID, current_process->PROCESS_NAME);
 #endif
 
-		int_lock = true;
-		Z502_IDLE();
-		// request lock to wait for interrupt handler to finish
-		while (int_lock) {
-			; //busy wait
+			int_lock = true;
+			Z502_IDLE();
+			// request lock to wait for interrupt handler to finish
+			while (int_lock) {
+				; //busy wait
+			}
+
+#ifdef LOG_OS
+			printf("\t\t=> => Process {id: %d, name:%s} finished waiting for interrupt handler.\n", current_process->ID, current_process->PROCESS_NAME);
+#endif
+			// unlock and leave
+
+			CALL(this->schedule(p));
+			return;
 		}
 
-#ifdef LOG_OS
-		printf("\t\t=> => Process {id: %d, name:%s} finished waiting for interrupt handler.\n", current_process->ID, current_process->PROCESS_NAME);
-#endif
-		// unlock and leave
-
-		CALL(this->schedule(p));
+		break;
+	case PROCESS_STATE_RUNNING:
+		// do nothing keep running
+		ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &success));
 		return;
+	default:
+#ifdef DEBUG_OS
+		eprint();
+		printf("\t\t=> Undefined process status with id: %d\n", p->STATE);
+#endif
+		exit(1);
+		break;
 	}
+
 }
 
 /*
@@ -269,7 +291,8 @@ void scheduler_t::terminate(PCB* p, int* err) {
 #endif
 	p->STATE = PROCESS_STATE_ZOMBIE;
 	ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &success));
-	CALL(this->schedule(p));
+	if (p == current_process)
+		CALL(this->schedule(p));
 }
 
 /*
@@ -294,7 +317,7 @@ void scheduler_t::sleep(PCB* p, int time, int*err) {
 	printf("\t=> Sleep called on Process {id: %d, name:%s}.\n", p->ID, p->PROCESS_NAME);
 #endif
 
-	// validate time
+// validate time
 	if (time <= 0) {
 #ifdef DEBUG_OS
 		eprint();
@@ -337,7 +360,7 @@ void scheduler_t::sleep(PCB* p, int time, int*err) {
 		alarm_manager.add_alarm(wakeup_alarm);
 #ifdef LOG_OS
 		iprint();
-		printf("\t=> Process {id: %d, name:%s} Slept Successfully.\n", p->ID, p->PROCESS_NAME);
+		printf("\t\t=> Process {id: %d, name:%s} Slept Successfully.\n", p->ID, p->PROCESS_NAME);
 #endif
 		ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &success));
 		this->schedule(p);
@@ -355,161 +378,138 @@ void scheduler_t::sleep(PCB* p, int time, int*err) {
  *  ============================================== Resume a process ===============================================
  *
  *
+ */
+
+void scheduler_t::resume(PCB*p, int* err) {
+	*err = 0;
+// check if valid process transition
+#ifdef LOG_OS
+	iprint();
+	printf("\t=> Calling Resume on process (%d:%s)\n", p->ID, p->PROCESS_NAME);
+#endif
+	switch (p->STATE) {
+	case PROCESS_STATE_SUSPENDED:
+		CALL(suspended.remove(p));
+		CALL(ready.add(p));
+		p->STATE = PROCESS_STATE_READY;
+
+#ifdef LOG_OS
+		iprint();
+		int ready_size;
+		CALL(ready.size(&ready_size));
+		printf("\t\t=> => Process (%d:%s) is now ready , ready queue now have (%d) processes\n", p->ID, p->PROCESS_NAME, ready_size);
+#endif
+		break;
+	case PROCESS_STATE_CREATED:
+	case PROCESS_STATE_READY:
+	case PROCESS_STATE_BLOCKED:
+	case PROCESS_STATE_ZOMBIE:
+	case PROCESS_STATE_SLEEPING:
+	case PROCESS_STATE_RUNNING:
+#ifdef DEBUG_OS
+		eprint();
+		printf("\t\t=> => Invalid process transition from %s to READY in Resume\n", process_state[p->STATE]);
+#endif
+		*err = USER_ERROR_INVALID_STATE_TRANSITION;
+		break;
+
+	default:
+#ifdef DEBUG_OS
+		eprint();
+		printf("\t\t=> => Undefined process state with id: %d\n", p->STATE);
+#endif
+		exit(1);
+		break;
+	}
+}
+// end of resume process
+
+/*
  *
  *
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ *  ============================================== Change Priority ===============================================
  *
  *
  */
-
-bool scheduler_t::resume(PCB*p, int* err) {
-	// check if valid process transition
-//	if (p->STATE != PROCESS_STATE_SUSPENDED) {
-//		// bogus call process should be ready to sleep
-//		printf("USER_ERROR (scheduler->resume): process should be in suspended to resume!\n");
-//		*err = USER_ERROR_INVALID_STATE_TRANSITION;
-//		return false;
-//	}
-//
-//	// try to remove from suspended
-//	if (!this->suspended.remove(p)) {
-//		// bogus call process doesn't exist in suspended queue
-//		printf("USER_ERROR (scheduler->resume): process wasn't found in suspended queue! \n");
-//		*err = USER_ERROR_CORRUPTED_PROCESS;
-//		return false;
-//	}
-//
-//	// validate priority for bogus calls
-//	if (!this->validate_priority(p->PRIORITY)) {
-//		// invalid process priority, corrupted data was given
-//		printf("USER_ERROR (scheduler->resume): invalid process priority given! \n");
-//		*err = USER_ERROR_CORRUPTED_PROCESS;
-//		return false;
-//	}
-//
-//	// insert  or into ready queue
-//	this->add_to_ready(p);
-//
-//	if (!this->validate_priority(p->PRIORITY)) {
-//		// invalid process priority, corrupted data was given
-//		printf("USER_ERROR (scheduler->resume): invalid process priority given! \n");
-//		*err = USER_ERROR_CORRUPTED_PROCESS;
-//		return false;
-//	}
-//
-//	// update process state
-//	p->STATE = PROCESS_STATE_READY;
-//
-//	// no error occurred
-//	*err = 0;
-
-// moved to ready queue successfully
-	return true;
+void scheduler_t::change_priority(PCB* p, int new_priority, int* err) {
+// the only case we need to change its place when ready
+	if (p->STATE == PROCESS_STATE_READY) {
+		this->ready.remove(p);
+		p->PRIORITY = new_priority;
+		this->ready.add(p);
+	} else {
+		p->PRIORITY = new_priority;
+	}
 }
-bool scheduler_t::change_priority(PCB* p, int new_priority, int* err) {
+/*
+ *
+ *
+ *
+ *  ============================================== Suspend process ===============================================
+ *
+ *
+ */
+void scheduler_t::suspend(PCB* p, int* err) {
+	*err = 0;
+	int ready_size;
+// check if valid process transition
+#ifdef LOG_OS
+	iprint();
+	printf("\t=> Suspending process (%d:%s)\n", p->ID, p->PROCESS_NAME);
+#endif
+	switch (p->STATE) {
+	case PROCESS_STATE_RUNNING:
+		CALL(this->ready.size(&ready_size));
 
-//	if (!this->validate_priority(p->PRIORITY)) {
-//		// invalid process priority, corrPCB* pupted data was given
-//		printf("USER_ERROR (scheduler->resume): invalid process priority given! \n");
-//		*err = USER_ERROR_CORRUPTED_PROCESS;
-//		return false;
-//	}
-//
-//	if (!this->validate_priority(new_priority)) {
-//		// invalid process priority, corrupted data was given
-//		printf("USER_ERROR (scheduler->resume): invalid process new priority given! \n");
-//		*err = USER_ERROR_INVALID_ARGUMENT;
-//		return false;
-//	}
-//
-//	// the only case we need to change its place when ready
-//	if (p->STATE == PROCESS_STATE_READY) {
-//		this->remove_from_ready(p, true);
-//		p->PRIORITY = new_priority;
-//		this->add_to_ready(p);
-//	} else {
-//		p->PRIORITY = new_priority;
-//	}
-	return true;
+		if (ready_size || alarm_manager.alarms.size()) {
+			CALL(suspended.enqueue(p));
+			p->STATE = PROCESS_STATE_SUSPENDED;
+			CALL(this->schedule(p));
+			return;
+		} else {
+			*err = USER_ERROR_INVALID_STATE_TRANSITION;
+			return;
+		}
+
+		break;
+	case PROCESS_STATE_READY:
+		CALL(ready.remove(p));
+		CALL(suspended.enqueue(p));
+		p->STATE = PROCESS_STATE_SUSPENDED;
+		break;
+
+	case PROCESS_STATE_BLOCKED:
+		// don't remove from blocked queue until condition is signaled
+		CALL(suspended.enqueue(p));
+		p->STATE = PROCESS_STATE_SUSPENDED;
+		break;
+	case PROCESS_STATE_ZOMBIE:
+	case PROCESS_STATE_CREATED:
+	case PROCESS_STATE_SLEEPING: // to be handled
+	case PROCESS_STATE_SUSPENDED:
+#ifdef DEBUG_OS
+		eprint();
+		printf("\t\t=> => Invalid process transition from %s to SUSPENDED.\n", process_state[p->STATE]);
+#endif
+		*err = USER_ERROR_INVALID_STATE_TRANSITION;
+		break;
+	default:
+#ifdef DEBUG_OS
+		eprint();
+		printf("\t\t=> => Undefined process state with id: %d\n", p->STATE);
+#endif
+		exit(1);
+		break;
+	}
 }
-bool scheduler_t::suspend(PCB* p, int* err) {
-//	switch (p->STATE) {
-//	case PROCESS_STATE_READY:
-//		// process is ready suspend it
-//		if (!this->validate_priority(p->PRIORITY)) {
-//			// invalid process priority, corrupted data was given
-//			printf("USER_ERROR (scheduler->resume): invalid process priority given! \n");
-//			*err = USER_ERROR_CORRUPTED_PROCESS;
-//			return false;
-//		}
-//		// try to remove from ready queue
-//		if (!this->remove_from_ready(p, true)) {
-//			printf("USER_ERROR (scheduler->suspend): process isn't in ready queue! \n");
-//			*err = USER_ERROR_CORRUPTED_PROCESS;
-//			return false;
-//		}
-//		break;
-//	case PROCESS_STATE_SLEEPING:
-//
-//		// remove alarm
-//		if (!alarm_manager.remove(p)) {
-//			printf("USER_ERROR (scheduler->suspend): process wasn't find in alarm!\n");
-//			return false;
-//		}
-//		break;
-//
-//	case PROCESS_STATE_BLOCKED:
-//		// can't do that! return error
-//		printf("USER_ERROR (scheduler->suspend): can't suspend process waiting for even!\n");
-//		*err = USER_ERROR_INVALID_STATE_TRANSITION;
-//		return false;
-//	default:
-//		// can't do that! return error
-//		printf("USER_ERROR (scheduler->suspend): unsupported state!\n");
-//		*err = USER_ERROR_INVALID_STATE_TRANSITION;
-//		return false;
-//
-//	}
-//
-//	// change process state to suspended
-//	p->STATE = PROCESS_STATE_SUSPENDED;
-//	// put in queue
-//	this->suspended.enqueue(p);
-//
-//	bool success;
-//	this->schedule();
-	// success
-	return true;
+
+
+PCB* scheduler_t::get_waiting_for_message(INT32 SENDER_ID){
+	map<int, q_item*> m = this->suspended.m;
+	map<int, q_item*>::iterator it;
+	for(it = m.begin(); it!= m.end(); it++)
+		if(it->second->proc->waiting_for_message && it->second->proc->waiting_for == SENDER_ID )
+			return it->second->proc;
+	return NULL;
 }

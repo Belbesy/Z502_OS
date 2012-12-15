@@ -1,9 +1,12 @@
 #include <system_structs.h>
 #include <list>
 #include <process_queue.h>
+#include <const.h>
+#include <stdio.h>
 using namespace std;
 
 #define MAX_PRIORITY 300
+
 
 class pqueue {
 public:
