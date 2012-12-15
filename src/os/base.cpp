@@ -21,6 +21,9 @@
         3.11 August  2004: Support for OS level locking
 ************************************************************************/
 #include			"system_calls.h"
+#include			"alarmman.h"
+#include			"scheduler.h"
+
 #include			"intman.h"
 #include             "global.h"
 #include             "syscalls.h"
@@ -53,13 +56,17 @@ char                 *call_names[] = { "mem_read ", "mem_write",
                             "send     ", "receive  ", "disk_read",
                             "disk_wrt ", "def_sh_ar" };
 
-
+scheduler_t scheduler;
+alarm_manager_t alarm_manager;
+bool int_lock=0;
 /************************************************************************
     INTERRUPT_HANDLER
         When the Z502 gets a hardware interrupt, it transfers control to
         this routine in the OS.
 ************************************************************************/
 void    interrupt_handler( void ) {
+	INT32 success;
+	ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &success));
     INT32              device_id;
     INT32              status;
     INT32              Index = 0;
@@ -75,8 +82,10 @@ void    interrupt_handler( void ) {
 
     CALL(os_interrupt_handler(device_id, status));
 
-    // Clear out this device - we're done with it
     MEM_WRITE(Z502InterruptClear, &Index );
+
+	ZCALL(Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &success));
+	int_lock =0;
 }                                       /* End of interrupt_handler */
 /************************************************************************
     FAULT_HANDLER
@@ -158,10 +167,11 @@ void    os_init( void )
     /*  This should be done by a "os_make_process" routine, so that
         test0 runs on a process recognized by the operating system.    */
 
+scheduler.init();
+alarm_manager.init();
+    ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1d, USER_MODE ));
 
-    ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1c, USER_MODE ));
-
-    CALL(create_root_process((void *)test1a, next_context));
+    CALL(create_root_process((void *)test1d, next_context));
 
     ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
 

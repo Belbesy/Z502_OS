@@ -13,26 +13,31 @@ process_queue::process_queue() {
 	tail->prev = head;
 }
 
-bool process_queue::remove(PCB * p) {
+void process_queue::remove(PCB * p) {
 
 	q_item * item = m[p->ID];
 
-	if (!item)
-		return false;
+	if (!item) {
+#ifdef DEBUG_OS
+		eprint();
+		printf("=> => Process given (%d,%s) wasn't found in queue of priority! \n", p->ID, p->PROCESS_NAME, p->PRIORITY);
+#endif
+		exit(1);
+	}
 
 	len--;
 
 	q_item * back = item->prev;
 	q_item * forw = item->next;
+
 	back->next = forw;
 	forw->prev = back;
 
 	m.erase(p->ID);
 	free(item);
-	return true;
 }
 
-bool process_queue::enqueue(PCB * p) {
+void process_queue::enqueue(PCB * p) {
 	q_item* item = (q_item *) malloc(sizeof(q_item));
 	item->proc = p;
 
@@ -42,12 +47,15 @@ bool process_queue::enqueue(PCB * p) {
 
 	m[p->ID] = item;
 	len++;
-	return true;
 }
-PCB* process_queue::dequeue() {
-	if (!len)
-		return NULL;
-	else
+void process_queue::dequeue(PCB** result) {
+	if (!len) {
+#ifdef DEBUG_OS
+		eprint();
+		printf("=> => Can't dequeue an empty queue \n");
+#endif
+		exit(1);
+	} else
 		len--;
 
 	q_item* ret = tail->prev;
@@ -58,10 +66,10 @@ PCB* process_queue::dequeue() {
 
 	free(ret);
 	m.erase(p->ID);
-	return p;
+	*result = p;
 }
 
-int process_queue::size() {
-	return len;
+void process_queue::size(int * result) {
+	*result = len;
 }
 

@@ -20,9 +20,10 @@ struct alarmable {
 };
 
 class alarm_manager_t {
+public:
 	std::list<alarmable *> alarms;
 	typedef std::list<alarmable *>::iterator It;
-public:
+
 	alarm_manager_t();
 	void init();
 	void add_alarm(alarmable* alarm);

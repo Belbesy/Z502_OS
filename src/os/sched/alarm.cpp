@@ -6,6 +6,7 @@
 #include "protos.h"
 #include "z502.h"
 
+#include <list>
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -17,6 +18,8 @@ alarmable * turn_process;
 
 void z502_timer_set(int interval) {
 
+	//INT32 success;
+	//Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 1, TRUE, &success);
 
 	int get_status, time;
 	bool done = false;
@@ -43,6 +46,7 @@ void z502_timer_set(int interval) {
 			break;
 		}
 	}
+//	Z502_READ_MODIFY(MEMORY_INTERLOCK_BASE, 0, TRUE, &success);
 
 }
 
@@ -60,18 +64,17 @@ void alarm_manager_t::init() {
 
 }
 void alarm_manager_t::add_alarm(alarmable* alarm) {
-	if (alarms.size()) {
-
-		alarms.push_back(alarm);
-	} else {
+	if (!alarms.size()) {
 		turn_process = alarm;
 		z502_timer_set(alarm->time);
 	}
+	alarms.push_back(alarm);
 }
 bool alarm_manager_t::remove(void * given_ref) {
-	for (It i = alarms.begin(); i != alarms.end(); i++) {
+		for (It i = alarms.begin(); i != alarms.end(); i++) {
 		if ((*i)->ref == given_ref) {
 			alarms.erase(i);
+			INT32 success;
 			return true;
 		}
 	}
@@ -79,16 +82,17 @@ bool alarm_manager_t::remove(void * given_ref) {
 }
 
 void alarm_manager_t::alarm_handler(int device, int status) {
-
+//	extern bool alarm_lock;
+//	alarm_lock = true;
 	switch (status) {
 	case ERR_SUCCESS:
 		turn_process->call_back(turn_process->ref);
+		// this->remove(turn_process->ref);
+		alarms.pop_front();
 		free(turn_process);
 
 		if (alarms.size()) {
 			turn_process = alarms.front();
-			alarms.pop_front();
-
 			z502_timer_set(turn_process->time);
 		}
 
@@ -100,10 +104,11 @@ void alarm_manager_t::alarm_handler(int device, int status) {
 		break;
 	default:
 		// bogus status received
-		printf("SYSTEM INTERNPARENTAL ERROR (alarm.c) :  bogus timer status recieved, terminating..\n");
+		printf("SYSTEM INTERNPARENTAL ERROR (alarm.c) :  bogus timer status received, terminating..\n");
 		break;
 	}
 
+//	alarm_lock = false;
 }
 
 /*  End of z502_timer_set */

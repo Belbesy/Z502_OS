@@ -20,8 +20,10 @@ typedef         int                             BOOL;
 
 
 
-#define MAX_NUM_OF_PROCESSES 10
+#define MAX_NUM_OF_PROCESSES 200
 #define MAX_NUM_OF_MESSAGES  20
+
+#define PROCESS_STATE_CREATED       0
 
 #define PROCESS_STATE_READY 		1
 #define PROCESS_STATE_SLEEPING 		2
@@ -30,6 +32,7 @@ typedef         int                             BOOL;
 #define PROCESS_STATE_SUSPENDED 	4   // suspended by user
 
 #define PROCESS_STATE_RUNNING       5
+#define PROCESS_STATE_ZOMBIE	    6
 
 
 

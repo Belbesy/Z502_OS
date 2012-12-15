@@ -19,7 +19,4 @@ typedef void (* int_handler)(int, int);
 void    os_interrupt_handler(int, int);
 void 	os_fault_handler(int, int);
 
-// inturrupt handler
-void alarm_ih(int a, int b);
-
 #endif

@@ -25,12 +25,12 @@ struct process_queue {
 
 	process_queue() ;
 
-	bool remove(PCB * p);
+	void remove(PCB * p);
 
-	bool enqueue(PCB * p);
-	PCB* dequeue() ;
+	void enqueue(PCB * p);
+	void dequeue(PCB** p) ;
 
-	int size();
+	void size(int *);
 
 };
 
