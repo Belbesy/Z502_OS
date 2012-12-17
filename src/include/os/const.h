@@ -1,6 +1,4 @@
 
-#define DEBUG_OS
-#define LOG_OS
 
 
 #define			ERR_INVALID_PROCESS_NAME				22L

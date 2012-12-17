@@ -37,8 +37,9 @@ extern INT16 Z502_MODE;
 map<string, PCB*> P_TABLE_BY_NAME;
 map<INT32, PCB*> P_TABLE_BY_ID;
 
-map<INT32, MAIL*> SENDER_MAIL_BOX;
-map<INT32, MAIL*> RECEIVER_MAIL_BOX;
+list<MAIL*> mails;
+//multimap<INT32, MAIL*> SENDER_MAIL_BOX;
+//multimap<INT32, MAIL*> RECEIVER_MAIL_BOX;
 
 INT32 BROADCAST_ID = -5;
 PCB* current_process = NULL;
@@ -326,6 +327,57 @@ void sys_terminate_process() {
 	}
 }
 
+void erase_mail(MAIL* new_mail) {
+	list<MAIL*>::iterator it;
+	for (it = mails.begin(); it != mails.end(); it++) {
+		if (*it == new_mail) {
+			mails.erase(it);
+			break;
+		}
+	}
+
+//	multimap<INT32, MAIL*>::iterator itt;
+//	for (itt = RECEIVER_MAIL_BOX.begin(); itt != RECEIVER_MAIL_BOX.end(); itt++) {
+//		if (itt->second == new_mail) {
+//			RECEIVER_MAIL_BOX.erase(itt);
+//			break;
+//		}
+//	}
+//	for (itt = SENDER_MAIL_BOX.begin(); itt != SENDER_MAIL_BOX.end(); itt++) {
+//		if (itt->second == new_mail) {
+//			SENDER_MAIL_BOX.erase(itt);
+//			break;
+//		}
+//	}
+}
+
+void insert(MAIL* new_mail) {
+	mails.push_back(new_mail);
+//	SENDER_MAIL_BOX.insert(make_pair(->SENDER_ID, new_mail));
+//	RECEIVER_MAIL_BOX.insert(make_pair(new_mail->RECEIVER_ID, new_mail));
+
+}
+
+MAIL* find_reciver(INT32 reciever) {
+	list<MAIL*>::iterator it;
+	for (it = mails.begin(); it != mails.end(); it++) {
+		if ((*it)->RECEIVER_ID == reciever) {
+			return *it;
+		}
+	}
+	return NULL;
+}
+
+MAIL* find_sender(INT32 sender) {
+	list<MAIL*>::iterator it;
+	for (it = mails.begin(); it != mails.end(); it++) {
+		if ((*it)->SENDER_ID == sender) {
+			return *it;
+		}
+	}
+	return NULL;
+}
+
 void sys_send_message() {
 	INT32 ID;
 	MAIL* new_mail; // Mail Variable for SEND_MESSAGE call
@@ -339,9 +391,8 @@ void sys_send_message() {
 		return;
 	}
 
-
 	map<INT32, PCB*>::iterator it = P_TABLE_BY_ID.find(ID);
-	if (it == P_TABLE_BY_ID.end()&&ID!=-1) // ID not found
+	if (it == P_TABLE_BY_ID.end() && ID != -1) // ID not found
 			{
 		*(INT32 *) Z502_ARG4.PTR = ERR_INVALID_PROCESS_ID; // set error state to INVALID_PROCESS_ID
 		return;
@@ -374,12 +425,15 @@ void sys_send_message() {
 		new_mail = new MAIL;
 		new_mail->SENDER_ID = current_process->ID;
 		new_mail->RECEIVER_ID = BROADCAST_ID;
-		new_mail->MESSAGE = (char*) Z502_ARG2.PTR;
+		new_mail->MESSAGE= (char*) malloc(strlen((char*) Z502_ARG2.PTR));
+			strcpy(new_mail->MESSAGE, (char*) Z502_ARG2.PTR);
+	//	printf("=================  (%s)\n", new_mail->MESSAGE);
+
+		//strcpy(new_mail->MESSAGE, (char*) Z502_ARG2.PTR);
+
 		new_mail->SENDER_BUFFER_LENGTH = Z502_ARG3.VAL;
 
-		SENDER_MAIL_BOX[new_mail->SENDER_ID] = new_mail;
-		RECEIVER_MAIL_BOX[new_mail->RECEIVER_ID] = new_mail;
-
+		insert(new_mail);
 		//resume any process waiting for your message
 		PCB* waiting_me = scheduler.get_waiting_for_message(new_mail->SENDER_ID);
 
@@ -394,13 +448,14 @@ void sys_send_message() {
 			*(waiting_me->recieved_length) = new_mail->SENDER_BUFFER_LENGTH;
 			*(waiting_me->mailing_error) = ERR_SUCCESS;
 
-			SENDER_MAIL_BOX.erase(new_mail->SENDER_ID);
-			RECEIVER_MAIL_BOX.erase(new_mail->RECEIVER_ID);
+			erase_mail(new_mail);
+
 			NUM_OF_MESSAGES--;
 			int err;
 			scheduler.resume(waiting_me, &err);
 
 		}
+	//	printf("*****************   message(%s) from (%d) to (%d)\n", new_mail->MESSAGE, new_mail->SENDER_ID, new_mail->RECEIVER_ID);
 
 		*(INT32 *) Z502_ARG4.PTR = ERR_SUCCESS; // set error state to SUCCESS
 		return;
@@ -413,11 +468,14 @@ void sys_send_message() {
 	new_mail = new MAIL;
 	new_mail->SENDER_ID = current_process->ID;
 	new_mail->RECEIVER_ID = Z502_ARG1.VAL;
-	new_mail->MESSAGE = (char*) Z502_ARG2.PTR;
+//	strcpy(new_mail->MESSAGE, (char*) Z502_ARG2.PTR);
+	new_mail->MESSAGE= (char*) malloc(strlen((char*) Z502_ARG2.PTR));
+	strcpy(new_mail->MESSAGE, (char*) Z502_ARG2.PTR);
+
+	//printf("=================  (%s)\n", new_mail->MESSAGE);
 	new_mail->SENDER_BUFFER_LENGTH = Z502_ARG3.VAL;
 
-	SENDER_MAIL_BOX[new_mail->SENDER_ID] = new_mail;
-	RECEIVER_MAIL_BOX[new_mail->RECEIVER_ID] = new_mail;
+	insert(new_mail);
 
 	it = P_TABLE_BY_ID.find(new_mail->RECEIVER_ID);
 
@@ -429,8 +487,7 @@ void sys_send_message() {
 		*(it->second->recieved_length) = new_mail->SENDER_BUFFER_LENGTH;
 		*(it->second->mailing_error) = ERR_SUCCESS;
 
-		SENDER_MAIL_BOX.erase(new_mail->SENDER_ID);
-		RECEIVER_MAIL_BOX.erase(new_mail->RECEIVER_ID);
+		erase_mail(new_mail);
 		NUM_OF_MESSAGES--;
 		scheduler.resume(it->second, &err);
 
@@ -459,12 +516,12 @@ void sys_recieve_message() {
 	 */
 
 	if (SOURCE_ID == -1) {
-		map<INT32, MAIL*>::iterator RECEIVER_MAIL_BOX_IT = RECEIVER_MAIL_BOX.find(current_process->ID);
-		if (RECEIVER_MAIL_BOX_IT == RECEIVER_MAIL_BOX.end()) // no one left a message
-				{
-			RECEIVER_MAIL_BOX_IT = RECEIVER_MAIL_BOX.find(BROADCAST_ID);
-			if (RECEIVER_MAIL_BOX_IT == RECEIVER_MAIL_BOX.end()) // no one left a message yet
-					{
+		mail = find_reciver(current_process->ID);
+		if (mail == NULL) {
+			// no one left a message
+			mail = find_reciver(BROADCAST_ID);
+			if (mail == NULL) {
+				// no one left a message yet
 				INT32 err;
 				current_process->waiting_for_message = true;
 				current_process->waiting_for = BROADCAST_ID;
@@ -479,7 +536,6 @@ void sys_recieve_message() {
 				return;
 			}
 		}
-		mail = RECEIVER_MAIL_BOX_IT->second;
 		//check for buffer length
 		message_length = strlen(mail->MESSAGE);
 		if (message_length > Z502_ARG3.VAL || Z502_ARG3.VAL > 64) {
@@ -489,8 +545,8 @@ void sys_recieve_message() {
 		strcpy((char*) Z502_ARG2.PTR, mail->MESSAGE);
 		*(INT32 *) Z502_ARG4.PTR = mail->SENDER_BUFFER_LENGTH;
 		*(INT32 *) Z502_ARG5.PTR = mail->SENDER_ID;
-		SENDER_MAIL_BOX.erase(mail->SENDER_ID);
-		RECEIVER_MAIL_BOX.erase(mail->RECEIVER_ID);
+
+		erase_mail(mail);
 		delete mail;
 		*(INT32 *) Z502_ARG6.PTR = ERR_SUCCESS; // set error state to SUCCESS
 		NUM_OF_MESSAGES--;
@@ -508,9 +564,9 @@ void sys_recieve_message() {
 		return;
 	}
 
-	map<INT32, MAIL*>::iterator SENDER_MAIL_BOX_IT = SENDER_MAIL_BOX.find(SOURCE_ID);
-	if (SENDER_MAIL_BOX_IT == SENDER_MAIL_BOX.end()) // Source didn't leave a message
-			{
+	mail = find_sender(SOURCE_ID);
+	if (mail == NULL) {
+		// Source didn't leave a message
 		INT32 err;
 		current_process->waiting_for_message = true;
 		current_process->waiting_for = SOURCE_ID;
@@ -526,8 +582,6 @@ void sys_recieve_message() {
 
 	}
 
-	mail = SENDER_MAIL_BOX_IT->second;
-
 	//check for buffer length
 
 	message_length = strlen(mail->MESSAGE);
@@ -537,8 +591,7 @@ void sys_recieve_message() {
 	}
 
 	strcpy((char*) Z502_ARG2.PTR, mail->MESSAGE);
-	SENDER_MAIL_BOX.erase(mail->SENDER_ID);
-	RECEIVER_MAIL_BOX.erase(mail->RECEIVER_ID);
+	erase_mail(mail);
 	delete mail;
 	*(INT32 *) Z502_ARG6.PTR = ERR_SUCCESS; // set error state to SUCCESS
 	NUM_OF_MESSAGES--;

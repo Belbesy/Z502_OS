@@ -36,5 +36,6 @@ void os_interrupt_handler(int device_id, int status) {
 
 void os_fault_handler(int a, int b) {
 	//	TODO: ..
+
 }
 /* End of os_interrupt_handler */

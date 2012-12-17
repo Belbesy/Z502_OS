@@ -86,6 +86,31 @@ void interrupt_handler(void) {
 
 void fault_handler(void) {
 
+	INT32 device_id;
+	INT32 status;
+	INT32 Index = 0;
+//	// Get cause of interrupt
+//	MEM_READ(Z502InterruptDevice, &device_id);
+//	// Set this device as target of our query
+//	MEM_WRITE(Z502InterruptDevice, &device_id);
+//	// Now read the status of this device
+//	MEM_READ(Z502InterruptStatus, &status);
+
+	switch(device_id){
+	case CPU_ERROR:
+		puts("CPU_ERROR!\n");
+		break;
+	case PRIVILEGED_INSTRUCTION:
+		puts("Executing privileged instruction!\n");
+		break;
+	case INVALID_MEMORY:
+		puts("Invalid memory access!\n");
+		break;
+	}
+	puts("Invalid Instruction!");
+	ZCALL(Z502_HALT());
+//	MEM_WRITE(Z502InterruptClear, &Index);
+
 } /* End of fault_handler */
 
 /************************************************************************
@@ -155,9 +180,9 @@ void os_init(void) {
 	scheduler.init();
 	alarm_manager.init();
 
-	ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1j, USER_MODE ));
+	ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1k, USER_MODE ));
 
-	CALL(create_root_process((void *)test1j, next_context));
+	CALL(create_root_process((void *)test1k, next_context));
 
 	ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
 

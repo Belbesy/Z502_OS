@@ -1027,6 +1027,7 @@ void test1j(void) {
 		STEP( 12)
 			td->target_pid = -1;
 			sprintf(td->msg_sent, "This is message %d", td->send_loop_count);
+			//printf("===================%s\n", td->msg_sent);
 			td->send_length = 20;
 			SEND_MESSAGE( td->target_pid, td->msg_sent, td->send_length, &Z502_REG_9);
 
