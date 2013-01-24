@@ -1436,7 +1436,8 @@ void test1x(void) {
 			GET_TIME_OF_DAY( &Z502_REG_3);
 
 		STEP( 3)
-			SLEEP( ( sleep_time * Z502_REG_3 ) % 143);
+//			SLEEP( ( sleep_time * Z502_REG_3 ) % 143);
+		SLEEP( ( sleep_time ) % 143);
 			/* random*/
 
 		STEP( 4)

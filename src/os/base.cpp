@@ -180,9 +180,9 @@ void os_init(void) {
 	scheduler.init();
 	alarm_manager.init();
 
-	ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1k, USER_MODE ));
+	ZCALL( Z502_MAKE_CONTEXT( &next_context, (void *)test1j, USER_MODE ));
 
-	CALL(create_root_process((void *)test1k, next_context));
+	CALL(create_root_process((void *)test1j, next_context));
 
 	ZCALL( Z502_SWITCH_CONTEXT( SWITCH_CONTEXT_KILL_MODE, &next_context ));
 

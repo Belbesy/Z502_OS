@@ -1,6 +1,8 @@
 #include "global.h"
 #include "syscalls.h"
 #include "protos.h"
+#define 		DEBUG_OS
+#define			LOG_OS
 
 #include "system_structs.h"
 #include "scheduler.h"
@@ -434,6 +436,8 @@ void scheduler_t::resume(PCB*p, int* err) {
  */
 void scheduler_t::change_priority(PCB* p, int new_priority, int* err) {
 // the only case we need to change its place when ready
+
+	printf("========= changing Priority of (%d, %s) from %d to %d\n", p->ID, p->PROCESS_NAME, p->PRIORITY, new_priority );
 	if (p->STATE == PROCESS_STATE_READY) {
 		this->ready.remove(p);
 		p->PRIORITY = new_priority;
